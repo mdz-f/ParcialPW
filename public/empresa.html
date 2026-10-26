@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo empresarial | TalentoLink</title>
+  <meta name="description" content="Módulo para empresas: mantenimiento de empresas, publicación de empleos y revisión de postulaciones y candidatos.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body data-page="empresa">
+  <div id="tl-header"></div>
+
+  <section class="tl-page-header">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div><h1 class="h3 mb-1">Módulo empresarial</h1><p>Publica vacantes, administra tus empresas y revisa a tus candidatos.</p></div>
+      <button class="btn btn-light fw-semibold" onclick="mostrarSeccion('publicar')" id="btn-nueva-oferta"><i class="bi bi-plus-lg me-1"></i>Nueva oferta</button>
+    </div>
+  </section>
+
+  <main class="container mt-4">
+    <div id="aviso-rol"></div>
+    <div class="row g-4">
+      <!-- Menú lateral del módulo -->
+      <aside class="col-lg-3">
+        <div class="tl-card p-3" data-nota="Menú empresarial|Navega entre el resumen, mantenimiento de empresas, publicación de empleos, ofertas y postulaciones.">
+          <div class="list-group tl-side-menu" id="menu-empresa">
+            <a class="list-group-item active" data-seccion="resumen" id="menu-resumen"><i class="bi bi-speedometer2"></i>Resumen</a>
+            <a class="list-group-item" data-seccion="empresas" id="menu-empresas"><i class="bi bi-buildings"></i>Mis empresas</a>
+            <a class="list-group-item" data-seccion="publicar" id="menu-publicar"><i class="bi bi-megaphone"></i>Publicar empleo</a>
+            <a class="list-group-item" data-seccion="ofertas" id="menu-ofertas"><i class="bi bi-briefcase"></i>Mis ofertas</a>
+            <a class="list-group-item" data-seccion="postulaciones" id="menu-postulaciones"><i class="bi bi-people"></i>Postulaciones</a>
+          </div>
+        </div>
+      </aside>
+
+      <div class="col-lg-9">
+        <!-- ============ RESUMEN ============ -->
+        <section class="tl-admin-section active" id="sec-resumen">
+          <div class="row g-3 mb-4" id="kpis-empresa" data-nota="Indicadores|Ofertas activas, postulaciones recibidas, entrevistas y visitas a las vacantes."></div>
+          <div class="tl-card p-4" data-nota="Postulaciones recientes|Últimos candidatos que aplicaron a tus ofertas.">
+            <h2 class="tl-card-title mb-3"><i class="bi bi-clock-history"></i>Postulaciones recientes</h2>
+            <div id="recientes-empresa"></div>
+          </div>
+        </section>
+
+        <!-- ============ MANTENIMIENTO DE EMPRESAS (CRUD) ============ -->
+        <section class="tl-admin-section" id="sec-empresas">
+          <div class="tl-card p-4" data-nota="Mantenimiento de empresas|Crear, editar y eliminar los datos de las empresas que administras (nombre, sector, contacto, descripción).">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="tl-card-title mb-0"><i class="bi bi-buildings"></i>Mis empresas</h2>
+              <button class="btn btn-primary btn-sm" onclick="abrirEmpresa()" id="btn-agregar-empresa"><i class="bi bi-plus-lg"></i> Agregar empresa</button>
+            </div>
+            <div class="table-responsive"><table class="table table-hover mb-0">
+              <thead><tr><th>Empresa</th><th>Sector</th><th>Ubicación</th><th>Contacto</th><th class="text-end">Acciones</th></tr></thead>
+              <tbody id="tabla-empresas"></tbody>
+            </table></div>
+          </div>
+        </section>
+
+        <!-- ============ PUBLICAR EMPLEO ============ -->
+        <section class="tl-admin-section" id="sec-publicar">
+          <form class="tl-card p-4" id="form-publicar" data-nota="Formulario de publicación|Título, ubicación, requisitos, descripción y datos de contacto. Al publicar, la vacante aparece en la búsqueda.">
+            <h2 class="tl-card-title mb-1"><i class="bi bi-megaphone"></i>Publicar nueva oferta de empleo</h2>
+            <p class="text-muted small mb-4">Completa la información. Los campos con * son obligatorios.</p>
+
+            <h3 class="h6 text-primary">1. Información general</h3>
+            <div class="row g-3 mb-4">
+              <div class="col-md-8"><label class="form-label">Título del puesto *</label><input class="form-control" id="pub-titulo" placeholder="Ej. Desarrollador Backend Node.js" required></div>
+              <div class="col-md-4"><label class="form-label">Empresa *</label><select class="form-select" id="pub-empresa" required></select></div>
+              <div class="col-md-4"><label class="form-label">Ubicación *</label><input class="form-control" id="pub-ubicacion" placeholder="Ciudad, País" required></div>
+              <div class="col-md-4"><label class="form-label">Modalidad</label><select class="form-select" id="pub-modalidad"><option>Presencial</option><option>Remoto</option><option>Híbrido</option></select></div>
+              <div class="col-md-4"><label class="form-label">Sector</label><select class="form-select" id="pub-sector"><option>Tecnología</option><option>Finanzas</option><option>Salud</option><option>Educación</option><option>Logística</option><option>Marketing</option><option>Energía</option><option>Construcción</option></select></div>
+              <div class="col-md-4"><label class="form-label">Tipo de trabajo</label><select class="form-select" id="pub-tipo"><option>Tiempo completo</option><option>Medio tiempo</option><option>Prácticas</option><option>Freelance</option></select></div>
+              <div class="col-md-4"><label class="form-label">Tipo de contrato</label><select class="form-select" id="pub-contrato"><option>Indefinido</option><option>Temporal</option><option>Por proyecto</option></select></div>
+              <div class="col-md-4"><label class="form-label">Nivel de experiencia</label><select class="form-select" id="pub-nivel"><option>Practicante</option><option>Junior</option><option selected>Semi-senior</option><option>Senior</option><option>Gerencial</option></select></div>
+              <div class="col-md-6"><label class="form-label">Salario mínimo (USD) *</label><input type="number" class="form-control" id="pub-salmin" min="0" value="800" required></div>
+              <div class="col-md-6"><label class="form-label">Salario máximo (USD) *</label><input type="number" class="form-control" id="pub-salmax" min="0" value="1200" required></div>
+            </div>
+
+            <h3 class="h6 text-primary">2. Detalle del puesto</h3>
+            <div class="row g-3 mb-4">
+              <div class="col-12"><label class="form-label">Descripción *</label><textarea class="form-control" rows="3" id="pub-descripcion" required></textarea></div>
+              <div class="col-md-4"><label class="form-label">Responsabilidades</label><textarea class="form-control" rows="4" id="pub-responsabilidades" placeholder="Una por línea"></textarea></div>
+              <div class="col-md-4"><label class="form-label">Requisitos *</label><textarea class="form-control" rows="4" id="pub-requisitos" placeholder="Una por línea" required></textarea></div>
+              <div class="col-md-4"><label class="form-label">Beneficios</label><textarea class="form-control" rows="4" id="pub-beneficios" placeholder="Una por línea"></textarea></div>
+            </div>
+
+            <h3 class="h6 text-primary">3. Detalles de contacto</h3>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6"><label class="form-label">Correo de contacto *</label><input type="email" class="form-control" id="pub-email" required></div>
+              <div class="col-md-6"><label class="form-label">Teléfono</label><input class="form-control" id="pub-telefono"></div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+              <button type="reset" class="btn btn-light">Limpiar</button>
+              <button class="btn btn-primary px-4" id="btn-publicar"><i class="bi bi-send me-1"></i>Publicar oferta</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ============ MIS OFERTAS ============ -->
+        <section class="tl-admin-section" id="sec-ofertas">
+          <div class="tl-card p-4" data-nota="Ofertas publicadas|Lista de vacantes con número de postulantes; se pueden pausar, activar o eliminar.">
+            <h2 class="tl-card-title mb-3"><i class="bi bi-briefcase"></i>Mis ofertas publicadas</h2>
+            <div class="table-responsive"><table class="table table-hover mb-0">
+              <thead><tr><th>Puesto</th><th>Publicado</th><th>Postulantes</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+              <tbody id="tabla-ofertas"></tbody>
+            </table></div>
+          </div>
+        </section>
+
+        <!-- ============ POSTULACIONES ============ -->
+        <section class="tl-admin-section" id="sec-postulaciones">
+          <div class="tl-card p-4" data-nota="Consulta de postulaciones|Selecciona una oferta para ver sus candidatos, revisar su perfil y cambiar el estado del proceso.">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <h2 class="tl-card-title mb-0"><i class="bi bi-people"></i>Postulaciones por oferta</h2>
+              <select class="form-select w-auto" id="filtro-oferta"></select>
+            </div>
+            <div id="lista-candidatos"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: crear / editar empresa -->
+  <div class="modal fade" id="modal-empresa" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <form class="modal-content border-0 rounded-4" id="form-empresa">
+        <div class="modal-header"><h2 class="modal-title h5" id="titulo-modal-empresa">Empresa</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body row g-3 p-4">
+          <input type="hidden" id="emp-id">
+          <div class="col-md-6"><label class="form-label">Nombre *</label><input class="form-control" id="emp-nombre" required></div>
+          <div class="col-md-6"><label class="form-label">Sector</label><select class="form-select" id="emp-sector"><option>Tecnología</option><option>Finanzas</option><option>Salud</option><option>Educación</option><option>Logística</option><option>Marketing</option><option>Energía</option><option>Construcción</option></select></div>
+          <div class="col-md-6"><label class="form-label">Ubicación</label><input class="form-control" id="emp-ubicacion"></div>
+          <div class="col-md-6"><label class="form-label">N.º de empleados</label><select class="form-select" id="emp-empleados"><option>1-10</option><option>10-50</option><option>50-200</option><option>200-500</option><option>500-1000</option><option>1000+</option></select></div>
+          <div class="col-md-6"><label class="form-label">Correo *</label><input type="email" class="form-control" id="emp-email" required></div>
+          <div class="col-md-6"><label class="form-label">Teléfono</label><input class="form-control" id="emp-telefono"></div>
+          <div class="col-md-6"><label class="form-label">Sitio web</label><input class="form-control" id="emp-web"></div>
+          <div class="col-md-6"><label class="form-label">Color del logo</label><input type="color" class="form-control form-control-color w-100" id="emp-color" value="#0a66c2"></div>
+          <div class="col-12"><label class="form-label">Dirección</label><input class="form-control" id="emp-direccion"></div>
+          <div class="col-12"><label class="form-label">Descripción</label><textarea class="form-control" rows="3" id="emp-descripcion"></textarea></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" id="btn-guardar-empresa">Guardar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: perfil del candidato -->
+  <div class="modal fade" id="modal-candidato" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4" id="contenido-candidato"></div></div>
+  </div>
+
+  <div id="tl-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/pages/empresa.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "talentolink-portal-empleo",
+  "version": "1.0.0",
+  "description": "Prototipo de portal de búsqueda de empleo (estilo LinkedIn) - HTML, CSS, Bootstrap y Express (sin base de datos, datos simulados)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}

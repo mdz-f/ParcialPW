@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi perfil | TalentoLink</title>
+  <meta name="description" content="Tablero personal: gestión de perfil, currículum, estadísticas, alertas de empleo, solicitudes y valoraciones de empresas.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body data-page="perfil">
+  <div id="tl-header"></div>
+
+  <main class="container mt-4">
+    <h1 class="h3 mb-4">Tablero personal y perfil de usuario</h1>
+    <div class="row g-4">
+      <!-- =====================================================
+           MENÚ LATERAL: avatar, nombre y accesos rápidos
+           ===================================================== -->
+      <aside class="col-lg-3">
+        <div class="tl-card p-4 text-center" style="position:sticky;top:140px" data-nota="Menú del perfil|Foto, nombre y accesos a perfil, solicitudes, alertas, valoraciones y guardados.">
+          <div class="d-flex justify-content-center mb-2" id="perfil-avatar"></div>
+          <h2 class="h6 mb-0" id="perfil-nombre">Usuario</h2>
+          <small class="text-muted" id="perfil-titular"></small>
+          <div class="progress my-3" style="height:6px" title="Perfil completado"><div class="progress-bar bg-success" id="perfil-progreso" style="width:70%"></div></div>
+          <small class="text-muted d-block mb-3">Perfil completado: <b id="perfil-progreso-txt">70%</b></small>
+          <div class="list-group tl-side-menu text-start">
+            <a class="list-group-item active" href="#gestion"><i class="bi bi-person"></i>Mi perfil</a>
+            <a class="list-group-item" href="#solicitudes"><i class="bi bi-send"></i>Solicitudes</a>
+            <a class="list-group-item" href="#alertas"><i class="bi bi-bell"></i>Alertas</a>
+            <a class="list-group-item" href="#valoraciones"><i class="bi bi-star"></i>Valoraciones</a>
+            <a class="list-group-item" href="#guardados"><i class="bi bi-bookmark"></i>Empleos guardados</a>
+          </div>
+        </div>
+      </aside>
+
+      <div class="col-lg-9">
+        <div class="row g-4">
+          <!-- =====================================================
+               GESTIÓN DE PERFIL: datos personales y carga de CV
+               ===================================================== -->
+          <section class="col-xl-7" id="gestion">
+            <form class="tl-card p-4 h-100" id="form-perfil" data-nota="Gestión de perfil|Áreas para editar datos personales y cargar el currículum (PDF/DOCX).">
+              <h2 class="tl-card-title mb-3"><i class="bi bi-person-gear"></i>Gestión de perfil</h2>
+              <div class="row g-3">
+                <div class="col-sm-6"><label class="form-label small">Nombre</label><input class="form-control" id="p-nombre" required></div>
+                <div class="col-sm-6"><label class="form-label small">Apellidos</label><input class="form-control" id="p-apellidos"></div>
+                <div class="col-sm-6"><label class="form-label small">Email</label><input type="email" class="form-control" id="p-email" required></div>
+                <div class="col-sm-6"><label class="form-label small">Teléfono</label><input class="form-control" id="p-telefono"></div>
+                <div class="col-sm-6"><label class="form-label small">Titular profesional</label><input class="form-control" id="p-titular" placeholder="Ej. Desarrolladora Frontend"></div>
+                <div class="col-sm-6"><label class="form-label small">Ubicación</label><input class="form-control" id="p-ubicacion"></div>
+                <div class="col-12"><label class="form-label small">Habilidades (separadas por coma)</label><input class="form-control" id="p-habilidades"></div>
+                <div class="col-12">
+                  <!-- Zona para arrastrar o seleccionar el CV -->
+                  <label class="tl-dropzone w-100" id="dropzone-cv" for="p-cv">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <div class="fw-semibold mt-1">Cargar currículum (PDF, DOCX)</div>
+                    <small id="cv-nombre">Arrastra tu archivo aquí o haz clic para seleccionarlo</small>
+                  </label>
+                  <input type="file" id="p-cv" accept=".pdf,.doc,.docx" hidden>
+                </div>
+              </div>
+              <div class="text-end mt-3"><button class="btn btn-primary px-4" id="btn-guardar-perfil"><i class="bi bi-check2 me-1"></i>Guardar cambios</button></div>
+            </form>
+          </section>
+
+          <!-- =====================================================
+               ESTADÍSTICAS DE PERFIL
+               ===================================================== -->
+          <section class="col-xl-5">
+            <div class="tl-card p-4 h-100" data-nota="Estadísticas de perfil|Visitas al perfil y total de solicitudes enviadas, con gráficas de tendencia.">
+              <h2 class="tl-card-title mb-3"><i class="bi bi-graph-up-arrow"></i>Estadísticas de perfil</h2>
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div style="flex:1;height:70px"><canvas id="grafica-visitas"></canvas></div>
+                <div class="text-end"><div class="h3 fw-bold mb-0" id="stat-visitas">1,245</div><small class="text-muted">Visitas al perfil</small></div>
+              </div>
+              <hr>
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div style="flex:1;height:70px"><canvas id="grafica-solicitudes"></canvas></div>
+                <div class="text-end"><div class="h3 fw-bold mb-0" id="stat-solicitudes">0</div><small class="text-muted">Total de solicitudes enviadas</small></div>
+              </div>
+              <hr>
+              <div class="row text-center g-2">
+                <div class="col-4"><div class="fw-bold" id="stat-entrevistas">0</div><small class="text-muted">Entrevistas</small></div>
+                <div class="col-4"><div class="fw-bold">38</div><small class="text-muted">Apariciones en búsquedas</small></div>
+                <div class="col-4"><div class="fw-bold" id="stat-guardados">0</div><small class="text-muted">Guardados</small></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- =====================================================
+               PANEL DE ALERTAS
+               ===================================================== -->
+          <section class="col-xl-7" id="alertas">
+            <div class="tl-card p-4 h-100" data-nota="Panel de alertas|Control de notificaciones de trabajo: activar/desactivar, crear nuevas y elegir canal (correo o SMS).">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="tl-card-title mb-0"><i class="bi bi-bell"></i>Panel de alertas</h2>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#form-alerta" id="btn-nueva-alerta"><i class="bi bi-plus-lg"></i> Nueva</button>
+              </div>
+              <form class="collapse mb-3" id="form-alerta">
+                <div class="row g-2 p-3 bg-light rounded-3">
+                  <div class="col-sm-6"><input class="form-control form-control-sm" id="al-termino" placeholder="Puesto o palabra clave" required></div>
+                  <div class="col-sm-6"><input class="form-control form-control-sm" id="al-ubicacion" placeholder="Ubicación"></div>
+                  <div class="col-sm-4"><select class="form-select form-select-sm" id="al-frecuencia"><option>Inmediata</option><option selected>Diaria</option><option>Semanal</option></select></div>
+                  <div class="col-sm-4"><select class="form-select form-select-sm" id="al-canal"><option>Correo</option><option>SMS</option></select></div>
+                  <div class="col-sm-4 d-grid"><button class="btn btn-sm btn-primary">Crear alerta</button></div>
+                </div>
+              </form>
+              <div id="lista-alertas"></div>
+            </div>
+          </section>
+
+          <!-- =====================================================
+               SECCIÓN DE VALORACIONES
+               ===================================================== -->
+          <section class="col-xl-5" id="valoraciones">
+            <form class="tl-card p-4 h-100" id="form-valoracion" data-nota="Sección de valoraciones|Interfaz dedicada para calificar a empresas donde ha laborado.">
+              <h2 class="tl-card-title mb-3"><i class="bi bi-star"></i>Sección de valoraciones</h2>
+              <select class="form-select mb-3" id="val-empresa" required></select>
+              <div class="text-center mb-2" id="val-estrellas"></div>
+              <input class="form-control mb-2" id="val-titulo" placeholder="Título" required>
+              <textarea class="form-control mb-2" rows="3" id="val-comentario" placeholder="Escribe tu experiencia..." required></textarea>
+              <div class="text-end"><button class="btn btn-primary" id="btn-enviar-valoracion">Enviar</button></div>
+            </form>
+          </section>
+
+          <!-- =====================================================
+               MIS SOLICITUDES (seguimiento de postulaciones)
+               ===================================================== -->
+          <section class="col-12" id="solicitudes">
+            <div class="tl-card p-4" data-nota="Mis solicitudes|Ofertas a las que aplicó el usuario y estado actual de cada proceso.">
+              <h2 class="tl-card-title mb-3"><i class="bi bi-send"></i>Mis solicitudes</h2>
+              <div class="table-responsive"><table class="table table-hover mb-0">
+                <thead><tr><th>Puesto</th><th>Empresa</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+                <tbody id="tabla-solicitudes"></tbody>
+              </table></div>
+            </div>
+          </section>
+
+          <!-- Empleos guardados -->
+          <section class="col-12" id="guardados">
+            <div class="tl-card p-4" data-nota="Empleos guardados|Vacantes marcadas con el ícono de guardar para revisarlas después.">
+              <h2 class="tl-card-title mb-3"><i class="bi bi-bookmark"></i>Empleos guardados</h2>
+              <div class="row g-3" id="lista-guardados"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="tl-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/pages/perfil.js"></script>
+</body>
+</html>

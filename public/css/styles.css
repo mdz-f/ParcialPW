@@ -1,0 +1,301 @@
+/* ============================================================
+   TalentoLink - Hoja de estilos principal
+   ------------------------------------------------------------
+   Se construye SOBRE Bootstrap 5. Aquí solo se definen:
+   1. Variables de diseño (colores, radios, sombras)
+   2. Componentes propios (tarjetas de empleo, logos, métricas)
+   3. Sistema de "anotaciones" para explicar el prototipo
+   ============================================================ */
+
+/* ---------- 1. Variables de diseño ---------- */
+:root {
+  --tl-primary: #0a66c2;
+  --tl-primary-dark: #084e96;
+  --tl-primary-soft: #e8f1fb;
+  --tl-accent: #12b886;
+  --tl-warning: #f59f00;
+  --tl-danger: #e03131;
+  --tl-bg: #f3f5f9;
+  --tl-surface: #ffffff;
+  --tl-text: #1b2333;
+  --tl-muted: #6b7385;
+  --tl-border: #e3e7ee;
+  --tl-radius: 14px;
+  --tl-shadow: 0 2px 4px rgba(16, 24, 40, .04), 0 8px 24px rgba(16, 24, 40, .06);
+  --tl-shadow-hover: 0 4px 8px rgba(16, 24, 40, .06), 0 16px 40px rgba(16, 24, 40, .12);
+  --bs-primary: #0a66c2;
+  --bs-primary-rgb: 10, 102, 194;
+  --bs-link-color: #0a66c2;
+  --bs-link-color-rgb: 10, 102, 194;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--tl-bg);
+  color: var(--tl-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main { flex: 1; }
+h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -.02em; }
+.text-muted { color: var(--tl-muted) !important; }
+a { text-decoration: none; }
+
+/* Botones con el color de la marca */
+.btn-primary { background: var(--tl-primary); border-color: var(--tl-primary); font-weight: 600; }
+.btn-primary:hover, .btn-primary:focus { background: var(--tl-primary-dark); border-color: var(--tl-primary-dark); }
+.btn-outline-primary { color: var(--tl-primary); border-color: var(--tl-primary); font-weight: 600; }
+.btn-outline-primary:hover { background: var(--tl-primary); border-color: var(--tl-primary); }
+.btn { border-radius: 10px; transition: transform .15s ease, box-shadow .15s ease, background .15s; }
+.btn:active { transform: scale(.97); }
+.form-control, .form-select { border-radius: 10px; border-color: var(--tl-border); }
+.form-control:focus, .form-select:focus { border-color: var(--tl-primary); box-shadow: 0 0 0 .2rem rgba(10, 102, 194, .15); }
+.form-check-input:checked { background-color: var(--tl-primary); border-color: var(--tl-primary); }
+
+/* ---------- 2. Encabezado y navegación ---------- */
+.tl-header {
+  background: var(--tl-surface);
+  border-bottom: 1px solid var(--tl-border);
+  position: sticky; top: 0; z-index: 1030;
+}
+.tl-logo { display: flex; align-items: center; gap: .55rem; font-weight: 800; font-size: 1.3rem; color: var(--tl-text); }
+.tl-logo-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, #0a66c2, #12b886);
+  color: #fff; display: grid; place-items: center; font-size: 1.15rem;
+  box-shadow: 0 4px 12px rgba(10, 102, 194, .35);
+}
+.tl-logo span b { color: var(--tl-primary); }
+.tl-login-form .form-control { width: 170px; font-size: .875rem; }
+
+.tl-nav { background: var(--tl-surface); border-bottom: 1px solid var(--tl-border); }
+.tl-nav .nav-link {
+  color: var(--tl-muted); font-weight: 500; font-size: .92rem;
+  padding: .85rem 1rem; border-bottom: 3px solid transparent;
+  display: flex; align-items: center; gap: .4rem; transition: color .15s, border-color .15s;
+}
+.tl-nav .nav-link:hover { color: var(--tl-text); }
+.tl-nav .nav-link.active { color: var(--tl-primary); border-bottom-color: var(--tl-primary); }
+.tl-nav .nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.tl-nav .nav::-webkit-scrollbar { display: none; }
+.tl-nav .nav-link { white-space: nowrap; }
+
+/* ---------- 3. Hero (búsqueda destacada) ---------- */
+.tl-hero {
+  background:
+    radial-gradient(circle at 85% 20%, rgba(18, 184, 134, .35), transparent 40%),
+    radial-gradient(circle at 10% 90%, rgba(255, 255, 255, .12), transparent 35%),
+    linear-gradient(135deg, #0a3d7a 0%, #0a66c2 60%, #1580e0 100%);
+  color: #fff; padding: 4.5rem 0 6rem; position: relative; overflow: hidden;
+}
+.tl-hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; }
+.tl-hero .lead { opacity: .85; }
+.tl-search-box {
+  background: #fff; border-radius: 18px; padding: 1rem; box-shadow: 0 20px 50px rgba(0, 0, 0, .2); color: var(--tl-text);
+}
+.tl-search-box .input-group-text { background: transparent; border-color: var(--tl-border); color: var(--tl-muted); border-radius: 10px 0 0 10px; }
+.tl-search-box .form-control, .tl-search-box .form-select { border-left: 0; }
+.tl-hero-tags a {
+  display: inline-block; color: #fff; border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 999px; padding: .25rem .8rem; font-size: .82rem; margin: .2rem; transition: background .15s;
+}
+.tl-hero-tags a:hover { background: rgba(255, 255, 255, .15); }
+
+/* Encabezado de páginas internas */
+.tl-page-header {
+  background: linear-gradient(135deg, #0a3d7a, #0a66c2);
+  color: #fff; padding: 2.2rem 0;
+}
+.tl-page-header p { opacity: .85; margin: 0; }
+
+/* ---------- 4. Tarjetas genéricas ---------- */
+.tl-card {
+  background: var(--tl-surface); border: 1px solid var(--tl-border);
+  border-radius: var(--tl-radius); box-shadow: var(--tl-shadow);
+}
+.tl-card-hover { transition: transform .2s ease, box-shadow .2s ease, border-color .2s; }
+.tl-card-hover:hover { transform: translateY(-3px); box-shadow: var(--tl-shadow-hover); border-color: #cfd8e6; }
+.tl-section-title { font-size: 1.5rem; margin-bottom: .25rem; }
+.tl-card-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
+.tl-card-title i { color: var(--tl-primary); }
+
+/* Métricas del portal */
+.tl-metrics { margin-top: -3.5rem; position: relative; z-index: 2; }
+.tl-metric { padding: 1.4rem; display: flex; align-items: center; gap: 1rem; }
+.tl-metric-icon {
+  width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 1.4rem; flex-shrink: 0;
+}
+.tl-metric-value { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+.tl-metric-label { color: var(--tl-muted); font-size: .85rem; }
+.bg-soft-blue { background: #e8f1fb; color: #0a66c2; }
+.bg-soft-green { background: #e6f8f1; color: #0c9a6e; }
+.bg-soft-orange { background: #fff4e0; color: #d98200; }
+.bg-soft-purple { background: #f1ebff; color: #7048e8; }
+.bg-soft-red { background: #ffecec; color: #e03131; }
+
+/* Logo de empresa con iniciales */
+.tl-company-logo {
+  width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
+  display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 1.05rem;
+}
+.tl-company-logo.lg { width: 76px; height: 76px; font-size: 1.6rem; border-radius: 16px; }
+.tl-company-logo.sm { width: 38px; height: 38px; font-size: .85rem; border-radius: 10px; }
+
+/* Tarjeta de empleo */
+.tl-job-card { padding: 1.2rem; display: flex; gap: 1rem; cursor: pointer; position: relative; }
+.tl-job-card h5 { font-size: 1.05rem; margin-bottom: .15rem; color: var(--tl-text); }
+.tl-job-card:hover h5 { color: var(--tl-primary); }
+.tl-job-meta { display: flex; flex-wrap: wrap; gap: .35rem .9rem; font-size: .85rem; color: var(--tl-muted); }
+.tl-job-meta i { margin-right: .25rem; }
+.tl-chip {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: var(--tl-primary-soft); color: var(--tl-primary);
+  font-size: .75rem; font-weight: 600; padding: .25rem .65rem; border-radius: 999px;
+}
+.tl-chip.green { background: #e6f8f1; color: #0c9a6e; }
+.tl-chip.orange { background: #fff4e0; color: #b86e00; }
+.tl-chip.gray { background: #eef1f5; color: #4a5263; }
+.tl-chip.purple { background: #f1ebff; color: #6741d9; }
+.tl-save-btn { position: absolute; top: 1rem; right: 1rem; color: var(--tl-muted); background: none; border: 0; font-size: 1.15rem; }
+.tl-save-btn:hover, .tl-save-btn.saved { color: var(--tl-primary); }
+
+/* Sector / categoría */
+.tl-sector { padding: 1.2rem; text-align: center; cursor: pointer; }
+.tl-sector i { font-size: 1.7rem; color: var(--tl-primary); }
+.tl-sector h6 { margin: .6rem 0 .1rem; font-size: .92rem; }
+
+/* Estrellas de valoración */
+.tl-stars { color: #f5b301; letter-spacing: 1px; }
+.tl-stars .bi-star { color: #d5d9e0; }
+.tl-star-input { display: inline-flex; flex-direction: row-reverse; gap: .2rem; }
+.tl-star-input input { display: none; }
+.tl-star-input label { font-size: 1.9rem; color: #d5d9e0; cursor: pointer; transition: color .1s, transform .1s; }
+.tl-star-input label:hover { transform: scale(1.12); }
+.tl-star-input input:checked ~ label,
+.tl-star-input label:hover,
+.tl-star-input label:hover ~ label { color: #f5b301; }
+
+/* Avatar */
+.tl-avatar {
+  border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, #0a66c2, #12b886); flex-shrink: 0;
+}
+
+/* Filtros laterales */
+.tl-filters { position: sticky; top: 140px; }
+.tl-filters h6 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--tl-muted); margin-bottom: .6rem; }
+.tl-filters .form-check { margin-bottom: .35rem; font-size: .92rem; }
+.tl-filter-group + .tl-filter-group { border-top: 1px solid var(--tl-border); padding-top: 1rem; margin-top: 1rem; }
+
+/* Menú lateral (perfil / empresa) */
+.tl-side-menu .list-group-item {
+  border: 0; border-radius: 10px !important; margin-bottom: .2rem; color: var(--tl-muted); font-weight: 500;
+  display: flex; align-items: center; gap: .6rem; cursor: pointer; padding: .65rem .9rem;
+}
+.tl-side-menu .list-group-item:hover { background: var(--tl-bg); color: var(--tl-text); }
+.tl-side-menu .list-group-item.active { background: var(--tl-primary-soft); color: var(--tl-primary); }
+
+/* Zona de carga de CV */
+.tl-dropzone {
+  border: 2px dashed #c6d0de; border-radius: 12px; padding: 1.5rem; text-align: center;
+  color: var(--tl-muted); cursor: pointer; transition: border-color .15s, background .15s;
+}
+.tl-dropzone:hover, .tl-dropzone.drag { border-color: var(--tl-primary); background: var(--tl-primary-soft); }
+.tl-dropzone i { font-size: 2rem; color: var(--tl-primary); }
+
+/* Tablas */
+.table { --bs-table-bg: transparent; }
+.table > :not(caption) > * > * { padding: .8rem .75rem; vertical-align: middle; }
+.table thead th { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--tl-muted); font-weight: 600; border-bottom-width: 1px; }
+
+/* Estados de postulación */
+.estado { font-size: .75rem; font-weight: 600; padding: .3rem .7rem; border-radius: 999px; }
+.estado-Recibida { background: #e8f1fb; color: #0a66c2; }
+.estado-En-revisión { background: #fff4e0; color: #b86e00; }
+.estado-Entrevista { background: #f1ebff; color: #6741d9; }
+.estado-Contratado { background: #e6f8f1; color: #0c9a6e; }
+.estado-Rechazada { background: #ffecec; color: #c92a2a; }
+
+/* Foros */
+.tl-thread { padding: 1.1rem 1.2rem; display: flex; gap: 1rem; cursor: pointer; }
+.tl-thread + .tl-thread { border-top: 1px solid var(--tl-border); }
+.tl-thread:hover { background: #fafbfd; }
+.tl-thread-stats { text-align: center; min-width: 64px; color: var(--tl-muted); font-size: .78rem; }
+.tl-thread-stats b { display: block; font-size: 1.1rem; color: var(--tl-text); }
+
+/* Recursos */
+.tl-resource-thumb {
+  height: 140px; border-radius: var(--tl-radius) var(--tl-radius) 0 0;
+  display: grid; place-items: center; color: #fff; font-size: 2.6rem; position: relative;
+}
+.tl-resource-thumb .badge { position: absolute; top: .75rem; left: .75rem; }
+
+/* ---------- 5. Panel administrativo ---------- */
+.tl-admin { display: flex; min-height: 100vh; }
+.tl-admin-sidebar {
+  width: 250px; background: #0f1b2d; color: #c4cede; flex-shrink: 0;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 1.2rem .8rem;
+}
+.tl-admin-sidebar .tl-logo { color: #fff; padding: 0 .5rem 1.2rem; }
+.tl-admin-sidebar .nav-link {
+  color: #c4cede; border-radius: 10px; padding: .65rem .9rem; display: flex; align-items: center; gap: .7rem;
+  font-size: .92rem; margin-bottom: .15rem; cursor: pointer;
+}
+.tl-admin-sidebar .nav-link:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+.tl-admin-sidebar .nav-link.active { background: var(--tl-primary); color: #fff; }
+.tl-admin-sidebar small { text-transform: uppercase; font-size: .7rem; letter-spacing: .08em; color: #6c7a91; padding: 1rem .9rem .4rem; display: block; }
+.tl-admin-main { flex: 1; min-width: 0; }
+.tl-admin-topbar { background: #fff; border-bottom: 1px solid var(--tl-border); padding: .9rem 1.5rem; position: sticky; top: 0; z-index: 10; }
+.tl-admin-section { display: none; animation: fadeIn .25s ease; }
+.tl-admin-section.active { display: block; }
+@media (max-width: 991px) {
+  .tl-admin { flex-direction: column; }
+  .tl-admin-sidebar { width: 100%; height: auto; position: static; }
+}
+
+/* ---------- 6. Footer ---------- */
+.tl-footer { background: #0f1b2d; color: #a9b4c6; padding: 3rem 0 1.5rem; margin-top: 4rem; }
+.tl-footer h6 { color: #fff; font-size: .9rem; margin-bottom: 1rem; }
+.tl-footer a { color: #a9b4c6; font-size: .9rem; display: block; margin-bottom: .45rem; }
+.tl-footer a:hover { color: #fff; }
+.tl-footer .tl-logo { color: #fff; }
+
+/* ---------- 7. Animaciones ---------- */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fade-in { animation: fadeIn .35s ease both; }
+.tl-empty { text-align: center; padding: 3rem 1rem; color: var(--tl-muted); }
+.tl-empty i { font-size: 2.5rem; display: block; margin-bottom: .5rem; }
+
+/* ============================================================
+   8. SISTEMA DE ANOTACIONES DEL PROTOTIPO
+   ------------------------------------------------------------
+   Cualquier elemento con el atributo data-nota="Título|Texto"
+   muestra un recuadro explicativo cuando el usuario activa el
+   botón flotante "Mostrar anotaciones" (ver layout.js).
+   ============================================================ */
+body.modo-notas [data-nota] {
+  outline: 2px dashed #f59f00; outline-offset: 4px; position: relative;
+}
+.tl-nota {
+  display: none; position: absolute; top: -14px; right: 10px; z-index: 50;
+  max-width: 260px; background: #fffbea; color: #3d3200; border: 1.5px solid #f59f00;
+  border-radius: 10px; padding: .55rem .75rem; font-size: .78rem; line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .15); text-align: left; font-weight: 400;
+  letter-spacing: 0; text-transform: none;
+}
+.tl-nota b { display: block; font-size: .82rem; margin-bottom: .1rem; }
+.tl-nota .num {
+  position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%;
+  background: #f59f00; color: #fff; font-weight: 700; display: grid; place-items: center; font-size: .75rem;
+}
+body.modo-notas .tl-nota { display: block; animation: fadeIn .25s ease; }
+
+.tl-notas-btn {
+  position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 2000;
+  background: #f59f00; color: #fff; border: 0; border-radius: 999px; padding: .7rem 1.1rem;
+  font-weight: 600; font-size: .88rem; box-shadow: 0 8px 24px rgba(245, 159, 0, .4);
+  display: flex; align-items: center; gap: .45rem; transition: transform .15s;
+}
+.tl-notas-btn:hover { transform: translateY(-2px); }
+body.modo-notas .tl-notas-btn { background: #1b2333; box-shadow: 0 8px 24px rgba(0, 0, 0, .3); }

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentoLink | Portal de búsqueda de empleo</title>
+  <meta name="description" content="TalentoLink: busca y postúlate a empleos por palabra clave, ubicación, tipo de trabajo, salario y nivel de experiencia.">
+  <!-- Bootstrap 5, iconos y tipografía Inter -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<!-- data-page indica qué opción del menú se marca como activa -->
+<body data-page="inicio">
+  <!-- Encabezado y navegación (se generan en js/layout.js) -->
+  <div id="tl-header"></div>
+
+  <main>
+    <!-- =====================================================
+         HERO: búsqueda de trabajo destacada
+         Envía los criterios a empleos.html por la URL (?q=...)
+         ===================================================== -->
+    <section class="tl-hero">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-9">
+            <span class="badge rounded-pill text-bg-light text-primary mb-3 px-3 py-2"><i class="bi bi-stars"></i> +1,200 nuevas vacantes esta semana</span>
+            <h1 class="mb-3">Encuentra el trabajo que impulsa tu carrera</h1>
+            <p class="lead mb-4">Busca entre miles de empleos de empresas verificadas en toda Latinoamérica.</p>
+          </div>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-xl-10">
+            <form class="tl-search-box" id="form-busqueda" action="empleos.html"
+                  data-nota="Motor de búsqueda|Busca por palabra clave, ubicación y tipo de trabajo. 'Filtros avanzados' agrega salario, nivel de experiencia y modalidad.">
+              <div class="row g-2">
+                <div class="col-md-5">
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control form-control-lg" name="q" id="busqueda-q" placeholder="Puesto, empresa o palabra clave">
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                    <input type="text" class="form-control form-control-lg" name="ubicacion" id="busqueda-ubicacion" placeholder="Ubicación" list="lista-ubicaciones">
+                    <datalist id="lista-ubicaciones"></datalist>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <select class="form-select form-select-lg" name="tipo" id="busqueda-tipo">
+                    <option value="">Tipo</option>
+                    <option>Tiempo completo</option><option>Medio tiempo</option><option>Prácticas</option><option>Freelance</option>
+                  </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                  <button class="btn btn-primary btn-lg" type="submit" id="btn-buscar"><i class="bi bi-search me-1"></i>Buscar</button>
+                </div>
+              </div>
+
+              <!-- Filtros avanzados (se despliegan) -->
+              <div class="collapse" id="filtros-avanzados">
+                <div class="row g-2 mt-1 pt-2 border-top">
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1">Salario mínimo (USD)</label>
+                    <select class="form-select" name="salario" id="busqueda-salario">
+                      <option value="">Cualquiera</option><option value="500">$500+</option><option value="1000">$1,000+</option><option value="1500">$1,500+</option><option value="2500">$2,500+</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1">Nivel de experiencia</label>
+                    <select class="form-select" name="nivel" id="busqueda-nivel">
+                      <option value="">Todos</option><option>Practicante</option><option>Junior</option><option>Semi-senior</option><option>Senior</option><option>Gerencial</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1">Modalidad</label>
+                    <select class="form-select" name="modalidad" id="busqueda-modalidad">
+                      <option value="">Todas</option><option>Presencial</option><option>Remoto</option><option>Híbrido</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="text-start mt-2">
+                <a class="small fw-semibold" data-bs-toggle="collapse" href="#filtros-avanzados" id="btn-filtros-avanzados"><i class="bi bi-sliders"></i> Filtros avanzados</a>
+              </div>
+            </form>
+
+            <div class="tl-hero-tags text-center mt-3">
+              <small class="opacity-75 me-1">Búsquedas populares:</small>
+              <a href="empleos.html?q=Desarrollador">Desarrollador</a>
+              <a href="empleos.html?modalidad=Remoto">Remoto</a>
+              <a href="empleos.html?q=Diseñador">Diseñador UI/UX</a>
+              <a href="empleos.html?nivel=Practicante">Prácticas</a>
+              <a href="empleos.html?q=Datos">Analista de datos</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         MÉTRICAS DEL PORTAL
+         Valores calculados a partir de los datos simulados
+         ===================================================== -->
+    <section class="container tl-metrics">
+      <div class="row g-3" id="metricas" data-nota="Métricas del portal|Totales de empresas, usuarios, empleos publicados y solicitudes recibidas (con animación de conteo)."></div>
+    </section>
+
+    <!-- =====================================================
+         EXPLORAR POR SECTOR
+         ===================================================== -->
+    <section class="container mt-5">
+      <div class="d-flex justify-content-between align-items-end mb-3">
+        <div><h2 class="tl-section-title">Explora por sector</h2><p class="text-muted mb-0">Encuentra oportunidades en tu industria</p></div>
+      </div>
+      <div class="row g-3" id="sectores" data-nota="Sectores|Atajos para buscar empleos filtrados por industria."></div>
+    </section>
+
+    <!-- =====================================================
+         EMPLEOS RECIENTES + EMPRESAS DESTACADAS
+         ===================================================== -->
+    <section class="container mt-5">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="d-flex justify-content-between align-items-end mb-3">
+            <div><h2 class="tl-section-title">Empleos recientes</h2><p class="text-muted mb-0">Las últimas vacantes publicadas</p></div>
+            <a href="empleos.html" class="fw-semibold">Ver todos <i class="bi bi-arrow-right"></i></a>
+          </div>
+          <div class="d-grid gap-3" id="empleos-recientes" data-nota="Empleos recientes|Últimas vacantes. Clic en una tarjeta para ver la descripción completa; el ícono guarda el empleo."></div>
+        </div>
+
+        <aside class="col-lg-4">
+          <div class="tl-card p-4 mb-4" data-nota="Empresas mejor valoradas|Ranking según las valoraciones de empleados.">
+            <h3 class="tl-card-title mb-3"><i class="bi bi-trophy"></i>Empresas mejor valoradas</h3>
+            <div id="top-empresas"></div>
+            <a href="valoraciones.html" class="btn btn-outline-primary w-100 mt-2">Ver todas las valoraciones</a>
+          </div>
+
+          <!-- Llamado a crear alertas de empleo -->
+          <div class="tl-card p-4 text-white border-0" style="background:linear-gradient(135deg,#12b886,#0a66c2)" data-nota="Alertas de empleo|Invita a crear alertas que notifican por correo o SMS cuando hay nuevas vacantes.">
+            <i class="bi bi-bell fs-2"></i>
+            <h3 class="h5 mt-2">Crea alertas de empleo</h3>
+            <p class="small opacity-75">Recibe por correo o SMS las vacantes que coinciden con lo que buscas.</p>
+            <a href="perfil.html#alertas" class="btn btn-light fw-semibold w-100" id="btn-crear-alerta-inicio">Crear alerta</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         CÓMO FUNCIONA (candidatos y empresas)
+         ===================================================== -->
+    <section class="container mt-5" data-nota="Información del portal|Explica en 3 pasos cómo usar la plataforma para candidatos y para empresas.">
+      <div class="tl-card p-4 p-lg-5">
+        <div class="text-center mb-4"><h2 class="tl-section-title">¿Cómo funciona TalentoLink?</h2><p class="text-muted">Conectamos a candidatos y empleadores de forma rápida y sencilla</p></div>
+        <div class="row g-4 text-center">
+          <div class="col-md-4"><div class="tl-metric-icon bg-soft-blue mx-auto mb-3"><i class="bi bi-person-plus"></i></div><h5>1. Crea tu perfil</h5><p class="text-muted small">Regístrate, completa tus datos y sube tu currículum en PDF o DOCX.</p></div>
+          <div class="col-md-4"><div class="tl-metric-icon bg-soft-green mx-auto mb-3"><i class="bi bi-search"></i></div><h5>2. Busca y filtra</h5><p class="text-muted small">Usa filtros por ubicación, salario, nivel y tipo de contrato.</p></div>
+          <div class="col-md-4"><div class="tl-metric-icon bg-soft-purple mx-auto mb-3"><i class="bi bi-send-check"></i></div><h5>3. Postúlate</h5><p class="text-muted small">Aplica con un clic y da seguimiento al estado de tu solicitud.</p></div>
+        </div>
+        <hr class="my-4">
+        <div class="row align-items-center g-3">
+          <div class="col-md-8"><h5 class="mb-1">¿Eres empresa?</h5><p class="text-muted mb-0">Publica vacantes, revisa candidatos y gestiona postulaciones desde el módulo empresarial.</p></div>
+          <div class="col-md-4 text-md-end"><a href="empresa.html" class="btn btn-primary px-4" id="btn-publicar-inicio"><i class="bi bi-megaphone me-1"></i>Publicar empleo</a></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         NOTICIAS Y RECURSOS
+         ===================================================== -->
+    <section class="container mt-5">
+      <div class="d-flex justify-content-between align-items-end mb-3">
+        <div><h2 class="tl-section-title">Noticias del mercado laboral</h2><p class="text-muted mb-0">Mantente informado</p></div>
+        <a href="recursos.html" class="fw-semibold">Ver recursos <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="row g-3" id="noticias" data-nota="Noticias|Información relevante del sector laboral, enlazada a la página de recursos."></div>
+    </section>
+  </main>
+
+  <div id="tl-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/pages/inicio.js"></script>
+</body>
+</html>

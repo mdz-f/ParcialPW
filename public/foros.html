@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foros de discusión | TalentoLink</title>
+  <meta name="description" content="Comunidad profesional: comparte experiencias, dudas y consejos categorizados por sectores laborales y niveles.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body data-page="foros">
+  <div id="tl-header"></div>
+
+  <section class="tl-page-header">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h1 class="h3 mb-1">Foros de discusión profesional</h1>
+        <p>Interactúa con otros profesionales, comparte experiencias y debate sobre carreras y salarios.</p>
+      </div>
+      <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#modal-nuevo-tema" id="btn-crear-tema">
+        <i class="bi bi-chat-dots-fill me-1"></i>Nuevo debate
+      </button>
+    </div>
+  </section>
+
+  <main class="container mt-4">
+    <div class="row g-4">
+      <!-- Filtros laterales por categorías de búsqueda de empleo -->
+      <aside class="col-lg-3">
+        <div class="tl-card p-3" data-nota="Categorías del foro|Categorizado por los filtros de búsqueda de empleos (Tecnología, Remoto, Junior, Finanzas, etc.).">
+          <h2 class="h6 fw-bold mb-3"><i class="bi bi-filter me-1 text-primary"></i>Categorías</h2>
+          <div class="list-group tl-side-menu" id="categorias-foro">
+            <button class="list-group-item active" data-cat=""><i class="bi bi-grid"></i>Todos los temas</button>
+            <button class="list-group-item" data-cat="Tecnología"><i class="bi bi-laptop"></i>Tecnología</button>
+            <button class="list-group-item" data-cat="Remoto"><i class="bi bi-house-door"></i>Trabajo Remoto</button>
+            <button class="list-group-item" data-cat="Junior"><i class="bi bi-person-workspace"></i>Primer empleo / Junior</button>
+            <button class="list-group-item" data-cat="Finanzas"><i class="bi bi-bank"></i>Finanzas</button>
+            <button class="list-group-item" data-cat="Marketing"><i class="bi bi-megaphone"></i>Marketing & Diseño</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Lista de debates e hilos -->
+      <section class="col-lg-9">
+        <div class="tl-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="tl-card-title mb-0" id="titulo-categoria"><i class="bi bi-chat-left-text"></i>Debates activos</h2>
+            <span class="text-muted small" id="contador-debates"></span>
+          </div>
+          <div id="lista-foros"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal: Crear nuevo tema de discusión -->
+  <div class="modal fade" id="modal-nuevo-tema" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content border-0 rounded-4" id="form-nuevo-tema">
+        <div class="modal-header">
+          <h2 class="h5 modal-title">Crear nuevo debate</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label">Título del tema</label>
+            <input class="form-control" id="tema-titulo" placeholder="¿De qué quieres hablar?" required>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label">Categoría / Filtro</label>
+              <select class="form-select" id="tema-categoria">
+                <option>Tecnología</option>
+                <option>Remoto</option>
+                <option>Junior</option>
+                <option>Finanzas</option>
+                <option>Marketing</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Nivel / Etiqueta</label>
+              <select class="form-select" id="tema-etiqueta">
+                <option>General</option>
+                <option>Practicante</option>
+                <option>Junior</option>
+                <option>Semi-senior</option>
+                <option>Senior</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mensaje o pregunta</label>
+            <textarea class="form-control" rows="4" id="tema-contenido" placeholder="Escribe tu consulta o comparte información..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Publicar debate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Ver hilo completo y responder -->
+  <div class="modal fade" id="modal-ver-hilo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 rounded-4" id="contenido-hilo"></div>
+    </div>
+  </div>
+
+  <div id="tl-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/layout.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let categoriaActual = '';
+
+      function pintarForos() {
+        const todos = Store.get('foros');
+        const lista = todos.filter((f) => !categoriaActual || f.categoria === categoriaActual);
+        document.getElementById('contador-debates').textContent = `${lista.length} temas`;
+
+        document.getElementById('lista-foros').innerHTML = lista.length ? lista.map((f) => `
+          <div class="tl-thread align-items-center" onclick="verHilo(${f.id})">
+            <div class="tl-thread-stats">
+              <b>${(f.respuestas || []).length}</b>
+              <span>respuestas</span>
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="tl-chip">${f.categoria}</span>
+                <span class="tl-chip gray">${f.etiqueta}</span>
+              </div>
+              <h3 class="h6 mb-1 text-dark fw-bold">${f.titulo}</h3>
+              <p class="small text-muted mb-1 text-truncate" style="max-width: 580px;">${f.contenido}</p>
+              <div class="small text-muted">Iniciado por <b>${f.autor}</b> · ${UI.haceTiempo(f.fecha)}</div>
+            </div>
+            <div class="text-end text-muted small d-none d-sm-block">
+              <i class="bi bi-eye"></i> ${f.vistas}
+            </div>
+          </div>
+        `).join('') : '<div class="tl-empty"><i class="bi bi-chat-square"></i>No hay temas en esta categoría. ¡Sé el primero en publicar!</div>';
+      }
+
+      window.verHilo = (id) => {
+        const f = Store.find('foros', id);
+        if (!f) return;
+        // Incrementar vistas
+        Store.update('foros', id, { vistas: (f.vistas || 0) + 1 });
+
+        const sesion = Sesion.get();
+        document.getElementById('contenido-hilo').innerHTML = `
+          <div class="modal-header border-bottom">
+            <div>
+              <span class="tl-chip mb-1">${f.categoria}</span>
+              <span class="tl-chip gray mb-1">${f.etiqueta}</span>
+              <h2 class="h5 modal-title mt-1">${f.titulo}</h2>
+              <div class="small text-muted">Publicado por <b>${f.autor}</b> · ${UI.haceTiempo(f.fecha)}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="p-3 bg-light rounded-3 mb-4">
+              <p class="mb-0">${f.contenido}</p>
+            </div>
+            <h4 class="h6 fw-bold mb-3"><i class="bi bi-chat-quote me-1"></i>Respuestas (${(f.respuestas || []).length})</h4>
+            <div id="lista-respuestas" class="mb-4">
+              ${(f.respuestas || []).length ? f.respuestas.map((r) => `
+                <div class="border-bottom pb-2 mb-2">
+                  <div class="d-flex justify-content-between small">
+                    <b>${r.autor}</b>
+                    <span class="text-muted">${UI.haceTiempo(r.fecha)}</span>
+                  </div>
+                  <div class="small text-secondary mt-1">${r.texto}</div>
+                </div>
+              `).join('') : '<p class="small text-muted">Aún no hay respuestas. ¡Sé el primero en responder!</p>'}
+            </div>
+            <form id="form-responder">
+              <div class="mb-2">
+                <textarea class="form-control" id="resp-texto" rows="2" placeholder="Escribe tu respuesta..." required></textarea>
+              </div>
+              <div class="text-end">
+                <button type="submit" class="btn btn-sm btn-primary">Responder</button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        document.getElementById('form-responder').addEventListener('submit', (ev) => {
+          ev.preventDefault();
+          const texto = document.getElementById('resp-texto').value;
+          const autor = sesion ? sesion.nombre : 'Usuario Anónimo';
+          const nuevasResp = [...(f.respuestas || []), { autor, texto, fecha: new Date().toISOString() }];
+          Store.update('foros', id, { respuestas: nuevasResp });
+          UI.toast('¡Respuesta publicada!');
+          verHilo(id);
+          pintarForos();
+        });
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-ver-hilo')).show();
+      };
+
+      // Filtro por categoría
+      document.querySelectorAll('#categorias-foro button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#categorias-foro button').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          categoriaActual = btn.dataset.cat;
+          document.getElementById('titulo-categoria').innerHTML = `<i class="bi bi-chat-left-text"></i> ${categoriaActual ? 'Debates de ' + categoriaActual : 'Todos los debates'}`;
+          pintarForos();
+        });
+      });
+
+      // Crear nuevo debate
+      document.getElementById('form-nuevo-tema').addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const sesion = Sesion.get();
+        Store.add('foros', {
+          titulo: document.getElementById('tema-titulo').value,
+          categoria: document.getElementById('tema-categoria').value,
+          etiqueta: document.getElementById('tema-etiqueta').value,
+          contenido: document.getElementById('tema-contenido').value,
+          autor: sesion ? sesion.nombre : 'María López',
+          fecha: new Date().toISOString(),
+          vistas: 1,
+          reportado: false,
+          respuestas: []
+        });
+        bootstrap.Modal.getInstance(document.getElementById('modal-nuevo-tema')).hide();
+        ev.target.reset();
+        UI.toast('¡Debate creado con éxito!');
+        pintarForos();
+      });
+
+      pintarForos();
+    });
+  </script>
+</body>
+</html>

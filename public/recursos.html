@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recursos y consejos de carrera | TalentoLink</title>
+  <meta name="description" content="Artículos, tutoriales y videos para prepararte para entrevistas, elaborar tu currículum y mejorar tus habilidades. Noticias del mercado laboral.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+<body data-page="recursos">
+  <div id="tl-header"></div>
+
+  <section class="tl-page-header">
+    <div class="container">
+      <h1 class="h3 mb-1">Recursos y consejos de carrera</h1>
+      <p>Prepárate para entrevistas, mejora tu currículum y desarrolla nuevas habilidades.</p>
+    </div>
+  </section>
+
+  <main class="container mt-4">
+    <!-- Filtros por categoría y tipo de recurso -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3" data-nota="Filtro de recursos|Filtra por categoría (entrevistas, currículum, habilidades, carrera) y por tipo (artículo, tutorial, video).">
+      <div class="btn-group flex-wrap" id="filtro-categoria">
+        <button class="btn btn-primary btn-sm" data-cat="">Todos</button>
+        <button class="btn btn-outline-primary btn-sm" data-cat="Entrevistas">Entrevistas</button>
+        <button class="btn btn-outline-primary btn-sm" data-cat="Currículum">Currículum</button>
+        <button class="btn btn-outline-primary btn-sm" data-cat="Habilidades">Habilidades</button>
+        <button class="btn btn-outline-primary btn-sm" data-cat="Carrera">Carrera</button>
+      </div>
+      <select class="form-select form-select-sm w-auto" id="filtro-tipo"><option value="">Todos los formatos</option><option>Artículo</option><option>Tutorial</option><option>Video</option></select>
+    </div>
+
+    <div class="row g-3 mb-5" id="lista-recursos" data-nota="Recursos útiles|Artículos, tutoriales y videos. Clic para abrir el contenido."></div>
+
+    <div class="row g-4">
+      <!-- Consejos rápidos (acordeón) -->
+      <section class="col-lg-7" data-nota="Consejos de carrera|Guías rápidas para entrevistas, currículum y crecimiento profesional.">
+        <h2 class="tl-section-title mb-3">Consejos rápidos</h2>
+        <div class="accordion" id="acordeon-consejos">
+          <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#c1"><i class="bi bi-chat-quote me-2 text-primary"></i>Antes de la entrevista</button></h3>
+            <div id="c1" class="accordion-collapse collapse show" data-bs-parent="#acordeon-consejos"><div class="accordion-body small"><ul class="mb-0"><li>Investiga la empresa, su misión y productos.</li><li>Prepara ejemplos con el método <b>STAR</b> (Situación, Tarea, Acción, Resultado).</li><li>Ten listas 2-3 preguntas para el entrevistador.</li><li>Prueba tu cámara y micrófono si es virtual.</li></ul></div></div></div>
+          <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c2"><i class="bi bi-file-earmark-person me-2 text-primary"></i>Un currículum efectivo</button></h3>
+            <div id="c2" class="accordion-collapse collapse" data-bs-parent="#acordeon-consejos"><div class="accordion-body small"><ul class="mb-0"><li>Máximo 1-2 páginas.</li><li>Usa verbos de acción y logros medibles.</li><li>Adapta las palabras clave a cada oferta.</li><li>Exporta en PDF con un diseño limpio.</li></ul></div></div></div>
+          <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c3"><i class="bi bi-rocket-takeoff me-2 text-primary"></i>Crecer profesionalmente</button></h3>
+            <div id="c3" class="accordion-collapse collapse" data-bs-parent="#acordeon-consejos"><div class="accordion-body small"><ul class="mb-0"><li>Define metas a 1, 3 y 5 años.</li><li>Busca un mentor en tu área.</li><li>Participa en los <a href="foros.html">foros</a> y comunidades.</li><li>Aprende una habilidad nueva cada trimestre.</li></ul></div></div></div>
+        </div>
+
+        <!-- Checklist interactivo del CV -->
+        <div class="tl-card p-4 mt-4" data-nota="Checklist del CV|Herramienta interactiva para verificar que el currículum esté completo.">
+          <h3 class="tl-card-title mb-3"><i class="bi bi-ui-checks"></i>Checklist de tu currículum <span class="tl-chip ms-auto" id="check-progreso">0/6</span></h3>
+          <div id="checklist"></div>
+        </div>
+      </section>
+
+      <!-- Noticias del sector laboral -->
+      <section class="col-lg-5" id="noticias" style="scroll-margin-top:140px" data-nota="Noticias del sector|Información y noticias relevantes del mercado laboral.">
+        <h2 class="tl-section-title mb-3">Noticias del sector laboral</h2>
+        <div class="d-grid gap-3" id="lista-noticias"></div>
+        <div class="tl-card p-4 mt-3 text-white border-0" style="background:linear-gradient(135deg,#7048e8,#0a66c2)">
+          <h3 class="h6"><i class="bi bi-envelope-paper me-1"></i>Boletín semanal</h3>
+          <p class="small opacity-75">Recibe cada lunes consejos y noticias del mercado laboral.</p>
+          <form class="d-flex gap-2" onsubmit="event.preventDefault(); UI.toast('¡Suscripción exitosa!'); this.reset();">
+            <input type="email" class="form-control form-control-sm" placeholder="tu@correo.com" required id="boletin-email"><button class="btn btn-light btn-sm fw-semibold">Suscribirme</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal para "abrir" un recurso -->
+  <div class="modal fade" id="modal-recurso" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 rounded-4" id="contenido-recurso"></div></div></div>
+
+  <div id="tl-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/layout.js"></script>
+  <script>
+    /**
+     * RECURSOS: filtra las tarjetas por categoría/tipo, abre el recurso
+     * en un modal, muestra noticias y un checklist de CV que se guarda.
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      const recursos = Store.get('recursos');
+      let categoria = '';
+
+      function pintar() {
+        const tipo = document.getElementById('filtro-tipo').value;
+        const lista = recursos.filter((r) => (!categoria || r.categoria === categoria) && (!tipo || r.tipo === tipo));
+        const iconoTipo = { 'Artículo': 'bi-file-text', Tutorial: 'bi-mortarboard', Video: 'bi-play-circle' };
+        document.getElementById('lista-recursos').innerHTML = lista.map((r) => `
+          <div class="col-sm-6 col-lg-3 fade-in">
+            <div class="tl-card tl-card-hover h-100" style="cursor:pointer" onclick="abrirRecurso(${r.id})">
+              <div class="tl-resource-thumb" style="background:linear-gradient(135deg, ${r.color}, ${r.color}bb)">
+                <span class="badge text-bg-light"><i class="bi ${iconoTipo[r.tipo]}"></i> ${r.tipo}</span><i class="bi ${r.icono}"></i>
+              </div>
+              <div class="p-3"><span class="tl-chip gray mb-2">${r.categoria}</span><h3 class="h6 mt-2">${r.titulo}</h3><p class="small text-muted mb-2">${r.resumen}</p><small class="text-muted"><i class="bi bi-clock"></i> ${r.duracion}</small></div>
+            </div>
+          </div>`).join('') || '<div class="col-12 tl-empty"><i class="bi bi-journal-x"></i>Sin recursos en esta categoría</div>';
+      }
+
+      window.abrirRecurso = (id) => {
+        const r = recursos.find((x) => x.id === id);
+        const cuerpo = r.tipo === 'Video'
+          ? `<div class="ratio ratio-16x9 rounded-3 d-grid place-items-center text-white" style="background:linear-gradient(135deg,${r.color},#0f1b2d)"><div class="d-flex flex-column align-items-center justify-content-center"><i class="bi bi-play-circle-fill" style="font-size:4rem"></i><small>Reproductor de video (simulado en el prototipo)</small></div></div>`
+          : `<p>${r.resumen}</p><p class="text-muted small">Aquí se mostrará el contenido completo del ${r.tipo.toLowerCase()}. En el prototipo se presenta un resumen de ejemplo con los puntos clave:</p>
+             <ol class="small"><li>Identifica tu objetivo profesional.</li><li>Aplica las recomendaciones paso a paso.</li><li>Practica y pide retroalimentación.</li></ol>`;
+        document.getElementById('contenido-recurso').innerHTML = `
+          <div class="modal-header"><div><span class="tl-chip">${r.categoria}</span> <span class="tl-chip gray">${r.tipo} · ${r.duracion}</span><h2 class="h5 mt-2 mb-0">${r.titulo}</h2></div><button class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body p-4">${cuerpo}</div>`;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-recurso')).show();
+      };
+
+      document.querySelectorAll('#filtro-categoria button').forEach((b) => b.addEventListener('click', () => {
+        categoria = b.dataset.cat;
+        document.querySelectorAll('#filtro-categoria button').forEach((x) => x.className = `btn btn-sm ${x === b ? 'btn-primary' : 'btn-outline-primary'}`);
+        pintar();
+      }));
+      document.getElementById('filtro-tipo').addEventListener('change', pintar);
+
+      // Noticias
+      document.getElementById('lista-noticias').innerHTML = Store.get('noticias').map((n) => `
+        <article class="tl-card tl-card-hover p-3">
+          <div class="d-flex justify-content-between small text-muted mb-1"><span>${n.fuente}</span><span>${UI.haceTiempo(n.fecha)}</span></div>
+          <h3 class="h6 mb-1">${n.titulo}</h3><p class="small text-muted mb-0">${n.resumen}</p>
+        </article>`).join('');
+
+      // Checklist del CV (estado guardado en localStorage)
+      const items = ['Datos de contacto actualizados', 'Resumen profesional de 3-4 líneas', 'Experiencia con logros medibles', 'Educación y certificaciones', 'Habilidades técnicas y blandas', 'Revisado sin errores ortográficos'];
+      const marcados = JSON.parse(localStorage.getItem('tl_checklist') || '[]');
+      const actualizar = () => document.getElementById('check-progreso').textContent = `${document.querySelectorAll('#checklist input:checked').length}/${items.length}`;
+      document.getElementById('checklist').innerHTML = items.map((t, i) => `
+        <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="chk-cv-${i}" ${marcados.includes(i) ? 'checked' : ''}><label class="form-check-label" for="chk-cv-${i}">${t}</label></div>`).join('');
+      document.querySelectorAll('#checklist input').forEach((c, i) => c.addEventListener('change', () => {
+        const sel = [...document.querySelectorAll('#checklist input')].map((x, j) => x.checked ? j : -1).filter((j) => j >= 0);
+        localStorage.setItem('tl_checklist', JSON.stringify(sel));
+        actualizar();
+      }));
+      actualizar();
+      pintar();
+    });
+  </script>
+</body>
+</html>
