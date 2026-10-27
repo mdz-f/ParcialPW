@@ -278,12 +278,28 @@ body.modo-notas [data-nota] {
   outline: 2px dashed #f59f00; outline-offset: 4px; position: relative;
 }
 .tl-nota {
-  display: none; position: absolute; top: -14px; right: 10px; z-index: 50;
+  display: none; position: absolute; top: 12px; right: 10px; z-index: 50;
   max-width: 260px; background: #fffbea; color: #3d3200; border: 1.5px solid #f59f00;
   border-radius: 10px; padding: .55rem .75rem; font-size: .78rem; line-height: 1.35;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .15); text-align: left; font-weight: 400;
   letter-spacing: 0; text-transform: none;
 }
+/* 1. Trae cualquier tarjeta al frente al pasar el cursor */
+.tl-nota:hover {
+  z-index: 9999 !important;
+}
+/* 2. Desplaza la nota de navegación hacia abajo para evitar el choque con el encabezado */
+.tl-nav .tl-nota {
+  top: 45px;
+  right: 30px;
+}
+/* 3. Desplaza las notas de la barra lateral hacia abajo para no tapar el menú */
+aside .tl-nota {
+  top: 100% !important;
+  margin-top: 12px;
+  right: 0;
+}
+
 .tl-nota b { display: block; font-size: .82rem; margin-bottom: .1rem; }
 .tl-nota .num {
   position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%;

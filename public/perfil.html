@@ -66,29 +66,53 @@
             </form>
           </section>
 
-          <!-- =====================================================
-               ESTADÍSTICAS DE PERFIL
-               ===================================================== -->
-          <section class="col-xl-5">
-            <div class="tl-card p-4 h-100" data-nota="Estadísticas de perfil|Visitas al perfil y total de solicitudes enviadas, con gráficas de tendencia.">
-              <h2 class="tl-card-title mb-3"><i class="bi bi-graph-up-arrow"></i>Estadísticas de perfil</h2>
-              <div class="d-flex align-items-center gap-3 mb-2">
-                <div style="flex:1;height:70px"><canvas id="grafica-visitas"></canvas></div>
-                <div class="text-end"><div class="h3 fw-bold mb-0" id="stat-visitas">1,245</div><small class="text-muted">Visitas al perfil</small></div>
-              </div>
-              <hr>
-              <div class="d-flex align-items-center gap-3 mb-2">
-                <div style="flex:1;height:70px"><canvas id="grafica-solicitudes"></canvas></div>
-                <div class="text-end"><div class="h3 fw-bold mb-0" id="stat-solicitudes">0</div><small class="text-muted">Total de solicitudes enviadas</small></div>
-              </div>
-              <hr>
-              <div class="row text-center g-2">
-                <div class="col-4"><div class="fw-bold" id="stat-entrevistas">0</div><small class="text-muted">Entrevistas</small></div>
-                <div class="col-4"><div class="fw-bold">38</div><small class="text-muted">Apariciones en búsquedas</small></div>
-                <div class="col-4"><div class="fw-bold" id="stat-guardados">0</div><small class="text-muted">Guardados</small></div>
-              </div>
-            </div>
-          </section>
+        <!-- =====================================================
+     ESTADÍSTICAS DE PERFIL
+     ===================================================== -->
+<section class="col-xl-5">
+  <div class="tl-card p-4 h-100" data-nota="Estadísticas de perfil|Visitas al perfil y total de solicitudes enviadas, con gráficas de tendencia.">
+    <h2 class="tl-card-title mb-3"><i class="bi bi-graph-up-arrow"></i>Estadísticas de perfil</h2>
+    
+    <div class="row align-items-center mb-3">
+      <div class="col-7" style="height:70px; position:relative;">
+        <canvas id="grafica-visitas"></canvas>
+      </div>
+      <div class="col-5 text-end">
+        <div class="h3 fw-bold mb-0" id="stat-visitas">1,245</div>
+        <small class="text-muted d-block lh-sm mt-1">Visitas al perfil</small>
+      </div>
+    </div>
+    
+    <hr>
+    
+    <div class="row align-items-center mb-3">
+      <div class="col-7" style="height:70px; position:relative;">
+        <canvas id="grafica-solicitudes"></canvas>
+      </div>
+      <div class="col-5 text-end">
+        <div class="h3 fw-bold mb-0" id="stat-solicitudes">2</div>
+        <small class="text-muted d-block lh-sm mt-1">Total de solicitudes enviadas</small>
+      </div>
+    </div>
+    
+    <hr>
+    
+    <div class="row text-center g-2 mt-2">
+      <div class="col-4">
+        <div class="fw-bold" id="stat-entrevistas">0</div>
+        <small class="text-muted lh-sm d-block">Entrevistas</small>
+      </div>
+      <div class="col-4">
+        <div class="fw-bold">38</div>
+        <small class="text-muted lh-sm d-block">Apariciones en búsquedas</small>
+      </div>
+      <div class="col-4">
+        <div class="fw-bold" id="stat-guardados">0</div>
+        <small class="text-muted lh-sm d-block">Guardados</small>
+      </div>
+    </div>
+  </div>
+</section>
 
           <!-- =====================================================
                PANEL DE ALERTAS
