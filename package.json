@@ -1,13 +1,15 @@
 {
-  "name": "talentolink-portal-empleo",
+  "name": "t-search-portal-empleo",
   "version": "1.0.0",
-  "description": "Prototipo de portal de búsqueda de empleo (estilo LinkedIn) - HTML, CSS, Bootstrap y Express (sin base de datos, datos simulados)",
+  "description": "T-Search - Portal de búsqueda y gestión de empleo con Node.js, Express, Bootstrap y PostgreSQL (Supabase)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
   "dependencies": {
-    "express": "^4.21.1"
+    "dotenv": "^18.0.10",
+    "express": "^4.21.1",
+    "pg": "^8.23.1"
   }
 }

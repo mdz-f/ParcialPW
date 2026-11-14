@@ -1,12 +1,12 @@
 /**
  * ============================================================
- *  TalentoLink - LAYOUT COMPARTIDO Y UTILIDADES
+ *  T-Search - LAYOUT COMPARTIDO Y UTILIDADES
  * ============================================================
  *  Este archivo se carga en TODAS las páginas y se encarga de:
- *   1. Pintar el encabezado (logo + inicio de sesión + registro)
+ *   1. Pintar el encabezado (logo T-Search + inicio de sesión + registro)
  *   2. Pintar la barra de navegación principal
  *   3. Pintar el pie de página
- *   4. Manejar una sesión SIMULADA (sin backend real)
+ *   4. Manejar una sesión (sincronizada con la BD)
  *   5. Ofrecer funciones de ayuda (formato de salario, fechas,
  *      estrellas, tarjetas de empleo, notificaciones...)
  *   6. El modo "Mostrar anotaciones" que explica cada sección
@@ -199,9 +199,9 @@ function renderHeader() {
   ];
 
   document.getElementById('tl-header').innerHTML = `
-    <header class="tl-header" data-nota="Encabezado|Logo del portal, formulario de inicio de sesión y botón para registrarse en el sitio.">
+    <header class="tl-header" data-nota="Encabezado|Logo del portal T-Search, formulario de inicio de sesión y botón para registrarse en el sitio.">
       <div class="container d-flex align-items-center justify-content-between py-2 gap-3">
-        <a href="index.html" class="tl-logo" id="logo"><div class="tl-logo-icon"><i class="bi bi-briefcase-fill"></i></div><span>Talento<b>Link</b></span></a>
+        <a href="index.html" class="tl-logo" id="logo"><div class="tl-logo-icon"><span class="tl-logo-t">T</span><i class="bi bi-search tl-logo-lens"></i></div><span>T-<b>Search</b></span></a>
         <div class="d-flex align-items-center gap-2">${zonaUsuario}</div>
       </div>
       <nav class="tl-nav" data-nota="Barra de navegación|Acceso a búsqueda de trabajo, publicar empleos, recursos, valoraciones, foros, mi perfil y administración.">
@@ -271,7 +271,7 @@ function renderAuthModal() {
           </div>
           <div class="alert alert-light border small mt-3 mb-0">
             <b><i class="bi bi-info-circle"></i> Cuentas demo:</b><br>
-            maria@correo.com (candidato) · empresa@nexodigital.com (empresa) · admin@talentolink.com (admin). Cualquier contraseña.
+            maria@correo.com (candidato) · empresa@nexodigital.com (empresa) · admin@tsearch.com (admin). Cualquier contraseña.
           </div>
         </div>
       </div>
@@ -315,7 +315,7 @@ function renderFooter() {
       <div class="container">
         <div class="row g-4">
           <div class="col-lg-4">
-            <a href="index.html" class="tl-logo mb-3"><div class="tl-logo-icon"><i class="bi bi-briefcase-fill"></i></div><span>Talento<b>Link</b></span></a>
+            <a href="index.html" class="tl-logo mb-3"><div class="tl-logo-icon"><span class="tl-logo-t">T</span><i class="bi bi-search tl-logo-lens"></i></div><span>T-<b>Search</b></span></a>
             <p class="small">Conectamos talento con oportunidades. El portal de empleo que ayuda a candidatos y empresas a encontrarse de forma eficiente.</p>
             <div class="d-flex gap-3 fs-5"><i class="bi bi-facebook"></i><i class="bi bi-linkedin"></i><i class="bi bi-instagram"></i><i class="bi bi-twitter-x"></i></div>
           </div>
@@ -326,7 +326,7 @@ function renderFooter() {
         </div>
         <hr class="border-secondary my-4">
         <div class="d-flex flex-wrap justify-content-between small gap-2">
-          <span>© 2026 TalentoLink · Prototipo académico</span>
+          <span>© 2026 T-Search · Portal de Búsqueda de Empleo</span>
           <a href="#" onclick="Store.reset(); return false;" class="m-0"><i class="bi bi-arrow-counterclockwise"></i> Restablecer datos de demostración</a>
         </div>
       </div>

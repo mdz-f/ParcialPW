@@ -1,11 +1,11 @@
-# DOCUMENTO DE DISEÑO Y PROTOTIPO: TALENTOLINK
+# DOCUMENTO DE DISEÑO Y PROYECTO: T-SEARCH
 ## Portal Web de Búsqueda y Gestión de Empleo
 
 ---
 
 ### PORTADA
 
-* **Nombre del Proyecto:** TalentoLink – Portal de Búsqueda y Gestión de Empleo
+* **Nombre del Proyecto:** T-Search – Portal de Búsqueda y Gestión de Empleo
 * **Asignatura:** Programación Web
 * **Entrega:** Primer Avance – Prototipo de Interfaz de Usuario (UI/UX)
 * **Integrantes del Equipo:**
@@ -35,7 +35,7 @@ Desarrollar un prototipo funcional para un portal de búsqueda de empleo en lín
 ### 2.1 Mapa del Sitio (Sitemap)
 
 ```
-TALENTOLINK
+T-SEARCH
 │
 ├── 1. MÓDULO PÚBLICO / VISITANTE
 │   ├── PAN-PUB-01: Página de Inicio (index.html)
@@ -283,9 +283,110 @@ Para facilitar la evaluación del prototipo y dar cumplimiento explícito a las 
 
 ---
 
-## 7. TECNOLOGÍAS UTILIZADAS EN ESTA ETAPA
+## 7. TECNOLOGÍAS UTILIZADAS
 
 * **Frontend:** HTML5 Semántico, Vanilla CSS (Design Tokens, variables, flexbox/grid), Bootstrap 5.3 (rejilla y componentes UI), Bootstrap Icons.
 * **Visualización de Datos:** Chart.js 4.4 para gráficas en dashboard y perfiles.
-* **Backend:** Node.js con Express 4.x para el servicio de archivos estáticos y puntos de enlace REST simulados.
-* **Capa de Persistencia (Fase Prototipo):** Simulación relacional en memoria (`public/js/data.js`) con persistencia en `localStorage` (CRUD para empresas, empleos, postulaciones, alertas, valoraciones y foros), permitiendo evaluar la funcionalidad completa previa a la conexión con PostgreSQL en el siguiente avance.
+* **Backend:** Node.js con Express 4.x y cliente `pg` (`node-postgres`) con pool de conexiones SSL.
+* **Base de Datos:** PostgreSQL alojado en **Supabase** (`database/schema.sql` y `database/db.js`), sincronizado con el cliente mediante API REST (`/api/sync` y `/api/:tabla`).
+
+---
+
+## 8. ESTRUCTURA DE LA BASE DE DATOS (SUPABASE POSTGRESQL)
+
+El esquema relacional se encuentra en [`database/schema.sql`](file:///c:/Users/Marcos/Desktop/ParcialPW-main/database/schema.sql) y la configuración de conexión en [`database/db.js`](file:///c:/Users/Marcos/Desktop/ParcialPW-main/database/db.js).
+
+### 8.1 Tablas Creadas y Relaciones
+1. **`usuarios`**: Almacena candidatos, cuentas de empresa/reclutadores y administradores (`rol IN ('candidato', 'empresa', 'admin')`, `estado IN ('Activo', 'Suspendido', 'Inactivo')`, habilidades en arreglo `TEXT[]`, CV y datos de contacto).
+2. **`empresas`**: Directorio y mantenimiento de empresas (`usuario_id` FK a `usuarios`, sector, ubicación, empleados, color institucional, estado `verificada`).
+3. **`empleos`**: Ofertas de trabajo publicadas por las empresas (`empresa_id` FK a `empresas`, modalidad `Presencial | Remoto | Híbrido`, rango salarial validado `salario_max >= salario_min`, arreglos `TEXT[]` para responsabilidades, requisitos y beneficios, y `estado IN ('Activa', 'Pausada', 'Inactiva', 'Cancelada', 'Cerrada')`).
+4. **`postulaciones`**: Aplicaciones de candidatos a ofertas (`empleo_id` FK a `empleos`, `usuario_id` FK a `usuarios`, restricción `UNIQUE(empleo_id, usuario_id)`, carta de presentación y `estado IN ('Recibida', 'En revisión', 'Entrevista', 'Aceptado', 'Contratado', 'Rechazada')`).
+5. **`empleos_guardados`**: Vacantes marcadas como favoritas por cada candidato (`usuario_id`, `empleo_id`).
+6. **`resenas`**: Calificaciones de 1 a 5 estrellas y opiniones sobre empresas (`empresa_id` FK a `empresas`, flag `reportada` para moderación).
+7. **`alertas`**: Suscripciones a alertas laborales por término, ubicación, frecuencia y canal (`usuario_id` FK a `usuarios`).
+8. **`foros`** y **`foro_respuestas`**: Debates comunitarios por categoría, contador de vistas, flag `reportado` y respuestas.
+9. **`recursos`** y **`noticias`**: Catálogo formativo (artículos, tutoriales, videos) y noticias del mercado laboral.
+10. **Vistas SQL (`v_empleos_completos`, `v_metricas_sistema`)**: Consultas pre-calculadas para el Dashboard y el Panel Administrativo.
+
+---
+
+## 9. PLAN DE TRABAJO EN GRUPO (DIVIDIDO EN 5 PARTES PARA LA ENTREGA FINAL)
+
+Para cumplir con todos los requisitos de la presentación, defensa y entrega final del proyecto, el desarrollo se divide en **5 partes** claramente asignables entre los integrantes del grupo:
+
+---
+
+### ✅ PARTE 1: Base de Datos en Supabase y Conexión Backend (Responsable Actual)
+**Objetivo:** Diseñar el modelo relacional en PostgreSQL (Supabase), corregir la lectura de variables de entorno y dejar funcionando la capa de persistencia y API base.
+
+* **Lo que ya quedó implementado en esta parte:**
+  1. **Corrección del archivo `.env`:** Como la contraseña de Supabase inicia con `#` (`#j8JY,!3/&@UJ@j`), en archivos `.env` sin comillas se interpretaba como un comentario vacío. Se colocaron comillas dobles (`password="#j8JY,!3/&@UJ@j"`) y se codificó la URL (`%23j8JY%2C%213%2F%26%40UJ%40j`).
+  2. **Script SQL Completo (`database/schema.sql`):** Incluye las 11 tablas, llaves foráneas con `ON DELETE CASCADE`, validaciones `CHECK`, índices de rendimiento, vistas y datos semilla (seed data).
+  3. **Módulo de Conexión (`database/db.js`) y API REST (`server.js`):** Pool de conexiones PostgreSQL con SSL para Supabase y endpoints `/api/estado`, `/api/sync`, `/api/reset` y CRUD completo `/api/:tabla`.
+  4. **Sincronización Frontend (`public/js/data.js`):** El objeto `Store` ahora sincroniza automáticamente con Supabase PostgreSQL manteniendo compatibilidad inmediata con todas las pantallas existentes.
+* **Cómo ejecutar el script en Supabase:**
+  1. Abrir el panel de **Supabase** -> sección **SQL Editor**.
+  2. Copiar todo el contenido de `database/schema.sql`, pegarlo en el editor y hacer clic en **Run**.
+  3. Iniciar el servidor con `npm start` y verificar en `http://localhost:3000/api/estado` que responda `"conectado": true` y `"tablasCreadas": 9`.
+
+---
+
+### 👤 PARTE 2: Autenticación, Registro y Módulo de Candidatos (Dashboard de Usuarios)
+**Objetivo:** Completar el flujo real del candidato desde que crea su cuenta hasta el seguimiento de sus postulaciones.
+**Requerimientos de defensa cubiertos:** *Crear Usuario, Usuario aplica a empleo, Dashboard de Usuarios.*
+
+* **Pasos a seguir por el compañero asignado:**
+  1. **Registro e Inicio de Sesión (`public/js/layout.js` y `server.js`):**
+     * Validar credenciales contra la tabla `usuarios` en PostgreSQL al iniciar sesión (verificando que `estado !== 'Suspendido'`).
+     * Al registrar un usuario nuevo en el modal `#modal-auth`, verificar que el correo no esté duplicado y guardar la sesión activa con el `id` real retornado por Supabase.
+  2. **Dashboard de Usuarios (`public/perfil.html` y `public/js/pages/perfil.js`):**
+     * Asegurar que cada candidato vea y edite únicamente su propio perfil (`uid = sesion.id`), actualizando `nombre`, `apellidos`, `telefono`, `titular`, `ubicacion`, `habilidades` y `cv`.
+     * Conectar la tabla de **"Mis Solicitudes"** para que muestre en tiempo real los cambios de estado cuando una empresa acepte o rechace su postulación.
+     * Persistir los empleos guardados en la tabla `empleos_guardados` además de `localStorage`.
+
+---
+
+### 🏢 PARTE 3: Módulo Empresarial, Gestión de Ofertas y Selección de Aplicantes
+**Objetivo:** Completar todas las operaciones de las empresas sobre sus vacantes y los candidatos que aplican.
+**Requerimientos de defensa cubiertos:** *Crear Empresa, Empresa crea oferta de empleo, Empresa ve aplicantes de ofertas, Empresa Acepta o Deniega aplicante, Empresa inactiva/cancela o elimina ofertas, Dashboard de Empresas.*
+
+* **Pasos a seguir por el compañero asignado:**
+  1. **Crear y Administrar Empresa (`public/empresa.html` y `public/js/pages/empresa.js`):**
+     * Asociar toda empresa creada con el `usuario_id` del reclutador autenticado.
+     * Validar todos los campos del formulario de creación/edición de empresa.
+  2. **Crear, Inactivar/Cancelar o Eliminar Ofertas de Empleo:**
+     * En la tabla de **"Mis ofertas"**, permitir cambiar el estado de la oferta entre `Activa`, `Pausada`, `Inactiva` y `Cancelada`, además de la opción de eliminarla definitivamente (`DELETE /api/empleos/:id`).
+     * Verificar que las ofertas inactivas o canceladas ya no aparezcan en el buscador público (`empleos.html`).
+  3. **Ver Aplicantes y Aceptar o Denegar Candidatos:**
+     * En la sección **"Postulaciones"**, agregar botones directos de acción rápida para **Aceptar (`Contratado` / `Aceptado`)** o **Denegar (`Rechazada`)** al aplicante, además del selector de etapas (`Recibida`, `En revisión`, `Entrevista`), actualizando los KPIs del Dashboard de Empresas al instante.
+
+---
+
+### 🔍 PARTE 4: Landing Page, Búsqueda de Empleos, Detalle y Valoraciones
+**Objetivo:** Pulir la experiencia pública de búsqueda, postulación y transparencia de empresas.
+**Requerimientos de defensa cubiertos:** *Landing Page, Usuario busca empleos y ve detalle de empleo, Usuario aplica a empleo.*
+
+* **Pasos a seguir por el compañero asignado:**
+  1. **Landing Page (`public/index.html` y `public/js/pages/inicio.js`):**
+     * Mostrar contadores reales obtenidos de la base de datos (total de empresas, usuarios activos, empleos activos y postulaciones).
+  2. **Buscador y Filtros (`public/empleos.html` y `public/js/pages/empleos.js`):**
+     * Verificar el funcionamiento combinado de filtros por palabra clave, ubicación, modalidad (`Presencial`, `Remoto`, `Híbrido`), nivel de experiencia, sector y salario mínimo.
+  3. **Detalle de Empleo y Postulación (`public/empleo.html` y `public/js/pages/empleo.js`):**
+     * Validar que un usuario con rol `empresa` no pueda postularse a una vacante (solo rol `candidato`) y que si no ha iniciado sesión se le solicite autenticarse antes de enviar su aplicación.
+     * Impedir postulaciones duplicadas del mismo usuario al mismo empleo (respaldado por el `UNIQUE (empleo_id, usuario_id)` de la base de datos).
+
+---
+
+### 🛡️ PARTE 5: Panel Administrativo, Pruebas Funcionales y Entregables Finales
+**Objetivo:** Asegurar la gobernanza del sistema desde el Panel Admin y preparar toda la documentación exigida para la entrega final.
+**Requerimientos de defensa cubiertos:** *Panel Administrativo, Documento de Pruebas Funcionales y de Integración, Manual de usuario en video, GitHub y ZIP.*
+
+* **Pasos a seguir por el compañero asignado:**
+  1. **Panel Administrativo (`public/admin.html`):**
+     * Restringir el acceso a `admin.html` únicamente a usuarios con `rol === 'admin'`.
+     * Verificar el funcionamiento completo en base de datos de: activar/suspender usuarios, otorgar/retirar el badge de `verificada` a empresas, pausar/eliminar cualquier vacante y aprobar/eliminar reseñas o debates reportados en el Centro de Moderación.
+  2. **Documento de Pruebas Funcionales y de Integración:**
+     * Redactar los casos de prueba (CP-01 a CP-12) cubriendo cada uno de los 12 puntos mínimos de la defensa (Precondiciones, Pasos, Resultado Esperado, Resultado Obtenido y Captura).
+  3. **Manual de Usuario en Video y Entrega en GitHub:**
+     * Grabar el video demostrativo recorriendo los flujos: Landing Page -> Crear Usuario -> Crear Empresa -> Publicar Oferta -> Buscar y Ver Detalle -> Aplicar -> Empresa revisa y Acepta/Deniega -> Empresa inactiva/elimina oferta -> Dashboards -> Panel Admin.
+     * Verificar que **todos los integrantes** tengan commits registrados en el repositorio de GitHub y generar el archivo `.zip` limpio (sin carpeta `node_modules`).

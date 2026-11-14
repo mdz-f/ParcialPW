@@ -1,5 +1,5 @@
 /* ============================================================
-   TalentoLink - Hoja de estilos principal
+   T-Search - Hoja de estilos principal
    ------------------------------------------------------------
    Se construye SOBRE Bootstrap 5. Aquí solo se definen:
    1. Variables de diseño (colores, radios, sombras)
@@ -59,12 +59,19 @@ a { text-decoration: none; }
   border-bottom: 1px solid var(--tl-border);
   position: sticky; top: 0; z-index: 1030;
 }
-.tl-logo { display: flex; align-items: center; gap: .55rem; font-weight: 800; font-size: 1.3rem; color: var(--tl-text); }
+.tl-logo { display: flex; align-items: center; gap: .6rem; font-weight: 800; font-size: 1.35rem; color: var(--tl-text); letter-spacing: -.03em; }
 .tl-logo-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: linear-gradient(135deg, #0a66c2, #12b886);
-  color: #fff; display: grid; place-items: center; font-size: 1.15rem;
+  width: 40px; height: 40px; border-radius: 11px;
+  background: linear-gradient(135deg, #0a66c2 0%, #12b886 100%);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  position: relative; font-size: 1.15rem;
   box-shadow: 0 4px 12px rgba(10, 102, 194, .35);
+}
+.tl-logo-t {
+  font-weight: 900; font-size: 1.25rem; line-height: 1; margin-right: -2px;
+}
+.tl-logo-lens {
+  font-size: .78rem; stroke-width: 1px; margin-top: 4px; opacity: .95;
 }
 .tl-logo span b { color: var(--tl-primary); }
 .tl-login-form .form-control { width: 170px; font-size: .875rem; }

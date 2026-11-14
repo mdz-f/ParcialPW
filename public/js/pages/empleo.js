@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cont.innerHTML = `<div class="tl-card tl-empty"><i class="bi bi-exclamation-circle"></i><h1 class="h5">Empleo no encontrado</h1><a href="empleos.html" class="btn btn-primary mt-2">Volver a la búsqueda</a></div>`;
     return;
   }
-  document.title = `${empleo.titulo} | TalentoLink`;
+  document.title = `${empleo.titulo} | T-Search`;
   const emp = UI.empresa(empleo.empresaId);
   const sesion = Sesion.get();
   const yaAplico = () => Store.get('postulaciones').some((p) => p.empleoId === empleo.id && p.usuarioId === (sesion?.id || 1) && p.propia);
