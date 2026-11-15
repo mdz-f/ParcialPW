@@ -6,14 +6,16 @@
  *  y expone la API REST conectada a la base de datos en Supabase.
  * ============================================================
  */
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const db = require('./database/db');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// Evita que si PORT quedó en 5432 o 6543 (puertos de PostgreSQL) se use para el servidor web
+const rawPort = Number(process.env.APP_PORT || process.env.PORT || 3000);
+const PORT = (rawPort === 5432 || rawPort === 6543) ? 3000 : rawPort;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -478,7 +480,7 @@ app.listen(PORT, async () => {
   console.log(`✅ T-Search corriendo en http://localhost:${PORT}`);
   try {
     const info = await db.verificarConexion();
-    console.log(`🗄️  Conectado a Supabase PostgreSQL (${info.tablasCreadas}/${info.totalEsperadas} tablas detectadas)`);
+    console.log(`🗄️  Conectado a Supabase PostgreSQL [${info.host}] (${info.tablasCreadas}/${info.totalEsperadas} tablas detectadas)`);
   } catch (err) {
     console.warn(`⚠️  Aviso de conexión a Supabase: ${err.message}`);
   }
