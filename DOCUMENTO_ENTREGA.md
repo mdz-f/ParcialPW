@@ -1,11 +1,11 @@
-# DOCUMENTO DE DISEÑO Y PROYECTO: T-SEARCH
+# DOCUMENTO DE DISEÑO Y PROYECTO: CHAMBEASV
 ## Portal Web de Búsqueda y Gestión de Empleo
 
 ---
 
 ### PORTADA
 
-* **Nombre del Proyecto:** T-Search – Portal de Búsqueda y Gestión de Empleo
+* **Nombre del Proyecto:** ChambeaSV – Portal de Búsqueda y Gestión de Empleo
 * **Asignatura:** Programación Web
 * **Entrega:** Primer Avance – Prototipo de Interfaz de Usuario (UI/UX)
 * **Integrantes del Equipo:**

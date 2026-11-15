@@ -1,9 +1,9 @@
 -- =============================================================================
--- PROYECTO: T-Search - Portal de Búsqueda y Gestión de Empleo
+-- PROYECTO: ChambeaSV - Portal de Búsqueda y Gestión de Empleo
 -- MOTOR: PostgreSQL 15+ (Supabase)
 -- ARCHIVO: database/schema.sql
 -- DESCRIPCIÓN: Estructura completa de tablas, llaves foráneas, restricciones,
---              índices, vistas y datos iniciales (seed) para T-Search.
+--              índices, vistas y datos iniciales (seed) para ChambeaSV.
 --              Puedes pegar y ejecutar todo este script en el "SQL Editor"
 --              de Supabase de una sola vez.
 -- =============================================================================
@@ -278,7 +278,7 @@ INSERT INTO usuarios (id, nombre, apellidos, email, password_hash, telefono, rol
 (3, 'Ana', 'Rodríguez', 'ana@correo.com', '123456', '+502 5555-1212', 'candidato', 'Enfermera Profesional', 'Guatemala, GT', ARRAY['Atención al paciente', 'Primeros auxilios'], NULL, 'Activo', NOW() - INTERVAL '20 days'),
 (4, 'Luis', 'Hernández', 'luis@correo.com', '123456', '+503 7777-8888', 'candidato', 'Diseñador Gráfico', 'San Salvador, SV', ARRAY['Illustrator', 'Figma', 'Branding'], NULL, 'Suspendido', NOW() - INTERVAL '15 days'),
 (5, 'Recursos Humanos', 'Nexo Digital', 'empresa@nexodigital.com', '123456', '+504 2234-5678', 'empresa', 'Reclutador Corporativo', 'Tegucigalpa, HN', ARRAY[]::TEXT[], NULL, 'Activo', NOW() - INTERVAL '60 days'),
-(6, 'Admin', 'T-Search', 'admin@tsearch.com', '123456', '', 'admin', 'Administrador del Sistema', 'Tegucigalpa, HN', ARRAY[]::TEXT[], NULL, 'Activo', NOW() - INTERVAL '90 days'),
+(6, 'Admin', 'ChambeaSV', 'admin@tsearch.com', '123456', '', 'admin', 'Administrador del Sistema', 'Tegucigalpa, HN', ARRAY[]::TEXT[], NULL, 'Activo', NOW() - INTERVAL '90 days'),
 (7, 'Sofía', 'Castillo', 'sofia@correo.com', '123456', '+506 8888-1111', 'candidato', 'Ingeniera Eléctrica', 'San José, CR', ARRAY['AutoCAD', 'PVsyst', 'Gestión de proyectos'], 'CV_Sofia_Castillo.pdf', 'Activo', NOW() - INTERVAL '8 days');
 
 -- 5.2 Empresas
@@ -434,7 +434,7 @@ INSERT INTO noticias (id, titulo, fecha, fuente, resumen) VALUES
 (1, 'El empleo tecnológico crece 18% en Centroamérica', NOW() - INTERVAL '1 day', 'Observatorio Laboral', 'La demanda de desarrolladores y analistas de datos sigue en aumento.'),
 (2, 'Nuevas regulaciones para el teletrabajo en la región', NOW() - INTERVAL '3 days', 'Diario Económico', 'Los gobiernos actualizan las leyes para proteger a trabajadores remotos.'),
 (3, 'Las energías renovables generarán 50,000 empleos', NOW() - INTERVAL '6 days', 'Revista Energía', 'Ingenieros y técnicos serán los perfiles más solicitados.'),
-(4, 'Ferias de empleo virtuales: fechas de noviembre', NOW() - INTERVAL '8 days', 'T-Search', 'Más de 120 empresas participarán en las próximas ferias en línea.');
+(4, 'Ferias de empleo virtuales: fechas de noviembre', NOW() - INTERVAL '8 days', 'ChambeaSV', 'Más de 120 empresas participarán en las próximas ferias en línea.');
 
 -- Ajustar las secuencias SERIAL al último ID insertado para evitar colisiones en nuevos INSERT
 SELECT setval('usuarios_id_seq', (SELECT COALESCE(MAX(id), 1) FROM usuarios));

@@ -1,9 +1,9 @@
 /**
  * ============================================================
- *  T-Search - LAYOUT COMPARTIDO Y UTILIDADES
+ *  ChambeaSV - LAYOUT COMPARTIDO Y UTILIDADES
  * ============================================================
  *  Este archivo se carga en TODAS las páginas y se encarga de:
- *   1. Pintar el encabezado (logo T-Search + inicio de sesión + registro)
+ *   1. Pintar el encabezado (logo ChambeaSV + inicio de sesión + registro)
  *   2. Pintar la barra de navegación principal
  *   3. Pintar el pie de página
  *   4. Manejar una sesión (sincronizada con la BD)
@@ -199,9 +199,9 @@ function renderHeader() {
   ];
 
   document.getElementById('tl-header').innerHTML = `
-    <header class="tl-header" data-nota="Encabezado|Logo del portal T-Search, formulario de inicio de sesión y botón para registrarse en el sitio.">
+    <header class="tl-header" data-nota="Encabezado|Logo de ChambeaSV, formulario de inicio de sesión y botón para registrarse en el sitio.">
       <div class="container d-flex align-items-center justify-content-between py-2 gap-3">
-        <a href="index.html" class="tl-logo" id="logo"><div class="tl-logo-icon"><span class="tl-logo-t">T</span><i class="bi bi-search tl-logo-lens"></i></div><span>T-<b>Search</b></span></a>
+        <a href="index.html" class="tl-logo" id="logo" aria-label="ChambeaSV, inicio"><div class="tl-logo-icon"><i class="bi bi-briefcase-fill"></i></div><span>Chambea<b>SV</b></span></a>
         <div class="d-flex align-items-center gap-2">${zonaUsuario}</div>
       </div>
       <nav class="tl-nav" data-nota="Barra de navegación|Acceso a búsqueda de trabajo, publicar empleos, recursos, valoraciones, foros, mi perfil y administración.">
@@ -263,7 +263,7 @@ function renderAuthModal() {
                 </div>
                 <div class="mb-3"><label class="form-label">Nombre completo / Empresa</label><input class="form-control" id="reg-nombre" required></div>
                 <div class="mb-3"><label class="form-label">Correo</label><input type="email" class="form-control" id="reg-email" required></div>
-                <div class="mb-3"><label class="form-label">Contraseña</label><input type="password" class="form-control" minlength="6" required></div>
+                <div class="mb-3"><label class="form-label">Contraseña</label><input type="password" class="form-control" id="reg-password" minlength="8" required></div>
                 <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="reg-terminos" required><label class="form-check-label small" for="reg-terminos">Acepto los términos y la política de privacidad</label></div>
                 <button class="btn btn-primary w-100">Crear cuenta</button>
               </form>
@@ -295,9 +295,10 @@ function renderAuthModal() {
     const rol = document.querySelector('input[name="tipo-cuenta"]:checked').value;
     const nombre = document.getElementById('reg-nombre').value;
     const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
     // Se "inserta" el usuario en la tabla simulada
     const partes = nombre.split(' ');
-    Store.add('usuarios', { nombre: partes[0], apellidos: partes.slice(1).join(' '), email, telefono: '', rol, titular: '', ubicacion: '', habilidades: [], estado: 'Activo', registro: new Date().toISOString() });
+    Store.add('usuarios', { nombre: partes[0], apellidos: partes.slice(1).join(' '), email, password, telefono: '', rol, titular: '', ubicacion: '', habilidades: [], estado: 'Activo', registro: new Date().toISOString() });
     localStorage.setItem('tl_sesion', JSON.stringify({ id: 1, nombre, email, rol }));
     UI.toast('¡Cuenta creada con éxito!');
     setTimeout(() => (location.href = rol === 'empresa' ? 'empresa.html' : 'perfil.html'), 700);
@@ -315,8 +316,8 @@ function renderFooter() {
       <div class="container">
         <div class="row g-4">
           <div class="col-lg-4">
-            <a href="index.html" class="tl-logo mb-3"><div class="tl-logo-icon"><span class="tl-logo-t">T</span><i class="bi bi-search tl-logo-lens"></i></div><span>T-<b>Search</b></span></a>
-            <p class="small">Conectamos talento con oportunidades. El portal de empleo que ayuda a candidatos y empresas a encontrarse de forma eficiente.</p>
+            <a href="index.html" class="tl-logo mb-3"><div class="tl-logo-icon"><i class="bi bi-briefcase-fill"></i></div><span>Chambea<b>SV</b></span></a>
+              <p class="small">Conectamos talento salvadoreño con oportunidades. Un espacio para encontrar empleo y descubrir perfiles profesionales.</p>
             <div class="d-flex gap-3 fs-5"><i class="bi bi-facebook"></i><i class="bi bi-linkedin"></i><i class="bi bi-instagram"></i><i class="bi bi-twitter-x"></i></div>
           </div>
           <div class="col-6 col-lg-2"><h6>Candidatos</h6><a href="empleos.html">Buscar empleos</a><a href="perfil.html">Mi perfil</a><a href="perfil.html#alertas">Alertas</a><a href="recursos.html">Recursos</a></div>
@@ -326,7 +327,7 @@ function renderFooter() {
         </div>
         <hr class="border-secondary my-4">
         <div class="d-flex flex-wrap justify-content-between small gap-2">
-          <span>© 2026 T-Search · Portal de Búsqueda de Empleo</span>
+          <span>© 2026 ChambeaSV · Portal de empleo de El Salvador</span>
           <a href="#" onclick="Store.reset(); return false;" class="m-0"><i class="bi bi-arrow-counterclockwise"></i> Restablecer datos de demostración</a>
         </div>
       </div>

@@ -1,11 +1,12 @@
 /**
  * ============================================================
- *  T-Search - Servidor Backend con PostgreSQL (Supabase)
+ *  ChambeaSV - Servidor Backend con PostgreSQL (Supabase)
  * ============================================================
  *  Servidor Express que entrega los archivos estáticos de /public
  *  y expone la API REST conectada a la base de datos en Supabase.
  * ============================================================
  */
+<<<<<<< HEAD
 require('dotenv').config({ quiet: true });
 const express = require('express');
 const path = require('path');
@@ -19,6 +20,14 @@ const PORT = (rawPort === 5432 || rawPort === 6543) ? 3000 : rawPort;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+=======
+require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+const db = require('./database/db');
+const app = require('./src/app');
+const PORT = Number(process.env.APP_PORT) || 3000;
+>>>>>>> d3dc537 (Modificaciones iniciales de sistema y ajustes de entorno)
 
 /* ------------------------------------------------------------
    Mapeadores entre columnas PostgreSQL (snake_case)
@@ -138,7 +147,8 @@ const Mappers = {
   })
 };
 
-const TABLAS_PERMITIDAS = Object.keys(Mappers);
+const TABLAS_MVC = new Set(['empleos', 'usuarios', 'postulaciones']);
+const TABLAS_PERMITIDAS = Object.keys(Mappers).filter((tabla) => !TABLAS_MVC.has(tabla));
 
 /* ------------------------------------------------------------
    1. Estado del servidor y conexión a Supabase
@@ -148,7 +158,7 @@ app.get('/api/estado', async (req, res) => {
     const info = await db.verificarConexion();
     res.json({
       ok: true,
-      mensaje: 'Servidor T-Search conectado a Supabase PostgreSQL',
+      mensaje: 'Servidor ChambeaSV conectado a Supabase PostgreSQL',
       baseDeDatos: info
     });
   } catch (err) {
@@ -247,32 +257,14 @@ app.get('/api/:tabla/:id', async (req, res) => {
 // INSERTAR (POST /api/:tabla)
 app.post('/api/:tabla', async (req, res) => {
   const { tabla } = req.params;
+  if (!TABLAS_PERMITIDAS.includes(tabla)) {
+    return res.status(404).json({ ok: false, error: 'Tabla no válida' });
+  }
   const b = req.body || {};
 
   try {
     let result;
     switch (tabla) {
-      case 'usuarios':
-        result = await db.query(
-          `INSERT INTO usuarios (nombre, apellidos, email, password_hash, telefono, rol, titular, ubicacion, habilidades, cv, estado)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-           RETURNING *`,
-          [
-            b.nombre || 'Usuario',
-            b.apellidos || '',
-            b.email,
-            b.password || '123456',
-            b.telefono || '',
-            b.rol || 'candidato',
-            b.titular || '',
-            b.ubicacion || '',
-            Array.isArray(b.habilidades) ? b.habilidades : [],
-            b.cv || null,
-            b.estado || 'Activo'
-          ]
-        );
-        break;
-
       case 'empresas':
         result = await db.query(
           `INSERT INTO empresas (usuario_id, nombre, sector, color, ubicacion, empleados, web, email, telefono, direccion, descripcion, verificada, propia)
@@ -291,51 +283,6 @@ app.post('/api/:tabla', async (req, res) => {
             b.direccion || '',
             b.descripcion || '',
             Boolean(b.verificada),
-            b.propia !== undefined ? Boolean(b.propia) : true
-          ]
-        );
-        break;
-
-      case 'empleos':
-        result = await db.query(
-          `INSERT INTO empleos (empresa_id, titulo, ubicacion, modalidad, tipo, contrato, nivel, sector, salario_min, salario_max, estado, descripcion, responsabilidades, requisitos, beneficios, contacto_email, contacto_telefono)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
-           RETURNING *`,
-          [
-            Number(b.empresaId || b.empresa_id || 1),
-            b.titulo,
-            b.ubicacion || 'Remoto',
-            b.modalidad || 'Presencial',
-            b.tipo || 'Tiempo completo',
-            b.contrato || 'Indefinido',
-            b.nivel || 'Junior',
-            b.sector || 'Tecnología',
-            Number(b.salarioMin ?? b.salario_min ?? 0),
-            Number(b.salarioMax ?? b.salario_max ?? 0),
-            b.estado || 'Activa',
-            b.descripcion || '',
-            Array.isArray(b.responsabilidades) ? b.responsabilidades : [],
-            Array.isArray(b.requisitos) ? b.requisitos : [],
-            Array.isArray(b.beneficios) ? b.beneficios : [],
-            b.contactoEmail || b.contacto_email || '',
-            b.contactoTelefono || b.contacto_telefono || ''
-          ]
-        );
-        break;
-
-      case 'postulaciones':
-        result = await db.query(
-          `INSERT INTO postulaciones (empleo_id, usuario_id, estado, carta, cv_adjunto, propia)
-           VALUES ($1, $2, $3, $4, $5, $6)
-           ON CONFLICT (empleo_id, usuario_id)
-           DO UPDATE SET carta = EXCLUDED.carta, fecha = NOW()
-           RETURNING *`,
-          [
-            Number(b.empleoId || b.empleo_id),
-            Number(b.usuarioId || b.usuario_id || 1),
-            b.estado || 'Recibida',
-            b.carta || '',
-            b.cvAdjunto || null,
             b.propia !== undefined ? Boolean(b.propia) : true
           ]
         );
@@ -471,17 +418,37 @@ app.delete('/api/:tabla/:id', async (req, res) => {
   }
 });
 
-// Cualquier ruta desconocida que no sea /api regresa a index.html
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+
+  const status = Number.isInteger(err.status) ? err.status : 500;
+  if (status >= 500) console.error('Error procesando solicitud:', err);
+  res.status(status).json({ ok: false, error: err.message || 'Error interno del servidor' });
+});
+
+// Evita devolver el HTML de inicio para endpoints desconocidos de la API.
 app.use((req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ ok: false, error: 'Endpoint no encontrado' });
+  }
   res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, async () => {
-  console.log(`✅ T-Search corriendo en http://localhost:${PORT}`);
+const server = app.listen(PORT, async () => {
+  console.log(`✅ ChambeaSV corriendo en http://localhost:${PORT}`);
   try {
     const info = await db.verificarConexion();
     console.log(`🗄️  Conectado a Supabase PostgreSQL [${info.host}] (${info.tablasCreadas}/${info.totalEsperadas} tablas detectadas)`);
   } catch (err) {
     console.warn(`⚠️  Aviso de conexión a Supabase: ${err.message}`);
   }
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`El puerto web ${PORT} ya está ocupado. Cerrá la instancia anterior o configura APP_PORT en .env.`);
+    process.exitCode = 1;
+    return;
+  }
+  throw err;
 });

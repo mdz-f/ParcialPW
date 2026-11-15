@@ -3,26 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscar empleos | T-Search</title>
+  <title>Buscar empleos | ChambeaSV</title>
   <meta name="description" content="Resultados de búsqueda de empleos con filtros por nivel de experiencia, sector laboral, tipo de contrato, modalidad y salario.">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="css/styles.css" rel="stylesheet">
 </head>
-<body data-page="empleos">
+<body data-page="empleos" class="page-search">
   <div id="tl-header"></div>
 
   <main>
     <!-- Barra de búsqueda superior (precargada con los parámetros de la URL) -->
     <section class="tl-page-header">
       <div class="container">
-        <h1 class="h3 mb-3">Buscar empleos</h1>
+        <div class="search-heading">
+          <span class="page-kicker"><i class="bi bi-stars"></i> Tu próximo paso profesional</span>
+          <h1 class="mb-2">Encuentra tu próxima oportunidad</h1>
+          <p>Explora puestos que se ajustan a tu experiencia, tus intereses y tu estilo de vida.</p>
+        </div>
         <form class="tl-search-box p-2" id="form-busqueda" data-nota="Búsqueda|Mantiene los criterios enviados desde el inicio y permite modificarlos sin recargar.">
           <div class="row g-2">
-            <div class="col-md-5"><div class="input-group"><span class="input-group-text"><i class="bi bi-search"></i></span><input class="form-control" id="f-q" placeholder="Puesto, empresa o palabra clave"></div></div>
+            <div class="col-md-4"><div class="input-group"><span class="input-group-text"><i class="bi bi-search"></i></span><input class="form-control" id="f-q" placeholder="Puesto, empresa o palabra clave"></div></div>
             <div class="col-md-3"><div class="input-group"><span class="input-group-text"><i class="bi bi-geo-alt"></i></span><input class="form-control" id="f-ubicacion" placeholder="Ubicación"></div></div>
-            <div class="col-md-2">
+            <div class="col-md-3">
               <select class="form-select" id="f-tipo"><option value="">Tipo de trabajo</option><option>Tiempo completo</option><option>Medio tiempo</option><option>Prácticas</option><option>Freelance</option></select>
             </div>
             <div class="col-md-2 d-grid"><button class="btn btn-primary" id="btn-buscar">Buscar</button></div>

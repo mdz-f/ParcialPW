@@ -1,7 +1,7 @@
 {
-  "name": "t-search-portal-empleo",
+  "name": "chambeasv-portal-empleo",
   "version": "1.0.0",
-  "description": "T-Search - Portal de búsqueda y gestión de empleo con Node.js, Express, Bootstrap y PostgreSQL (Supabase)",
+  "description": "ChambeaSV - Portal de búsqueda y gestión de empleo con Node.js, Express, Bootstrap y PostgreSQL (Supabase)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

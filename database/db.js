@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  T-Search - Conexión a Base de Datos PostgreSQL (Supabase)
+ *  ChambeaSV - Conexión a Base de Datos PostgreSQL (Supabase)
  * ============================================================
  *  Archivo: database/db.js
  *  Soporta tanto conexión IPv4 (Supabase Supavisor Pooler en

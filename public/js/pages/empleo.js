@@ -13,10 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     cont.innerHTML = `<div class="tl-card tl-empty"><i class="bi bi-exclamation-circle"></i><h1 class="h5">Empleo no encontrado</h1><a href="empleos.html" class="btn btn-primary mt-2">Volver a la búsqueda</a></div>`;
     return;
   }
-  document.title = `${empleo.titulo} | T-Search`;
+  document.title = `${empleo.titulo} | ChambeaSV`;
   const emp = UI.empresa(empleo.empresaId);
   const sesion = Sesion.get();
   const yaAplico = () => Store.get('postulaciones').some((p) => p.empleoId === empleo.id && p.usuarioId === (sesion?.id || 1) && p.propia);
+  const usuarioActual = Store.find('usuarios', sesion?.id || 1);
   const lista = (arr, icono) => `<ul class="list-unstyled mb-0">${arr.map((x) => `<li class="d-flex gap-2 mb-2"><i class="bi ${icono} text-primary"></i><span>${x}</span></li>`).join('')}</ul>`;
 
   // Empleos similares (mismo sector, distinto id)
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="row g-4">
       <div class="col-lg-8">
         <!-- Encabezado del empleo -->
-        <section class="tl-card p-4 mb-4" data-nota="Encabezado del empleo|Título, empresa, ubicación, salario y etiquetas de modalidad, nivel y contrato.">
+        <section class="tl-card p-4 mb-4 detail-header" data-nota="Encabezado del empleo|Título, empresa, ubicación, salario y etiquetas de modalidad, nivel y contrato.">
           <div class="d-flex gap-3 align-items-start">
             ${UI.logo(emp, 'lg')}
             <div class="flex-grow-1">
@@ -51,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </section>
 
         <!-- Descripción detallada -->
-        <section class="tl-card p-4 mb-4" data-nota="Descripción detallada|Información del puesto: responsabilidades, requisitos y beneficios.">
+        <section class="tl-card p-4 mb-4 detail-section detail-description" data-nota="Descripción detallada|Información del puesto: responsabilidades, requisitos y beneficios.">
           <h2 class="h5 mb-3">Descripción del puesto</h2>
           <p>${empleo.descripcion}</p>
           <h3 class="h6 mt-4 mb-3"><i class="bi bi-list-check text-primary me-1"></i>Responsabilidades</h3>${lista(empleo.responsabilidades, 'bi-dot')}
@@ -61,12 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </section>
 
         <!-- Comentarios y valoraciones de la empresa -->
-        <section class="tl-card p-4" id="seccion-resenas" data-nota="Valoraciones de la empresa|Los usuarios leen opiniones y dejan su comentario con calificación de 1 a 5 estrellas."></section>
+        <section class="tl-card p-4 detail-section" id="seccion-resenas" data-nota="Valoraciones de la empresa|Los usuarios leen opiniones y dejan su comentario con calificación de 1 a 5 estrellas."></section>
       </div>
 
       <!-- Columna derecha: aplicar + contacto -->
       <aside class="col-lg-4">
-        <div class="tl-card p-4 mb-4" style="position:sticky;top:140px" data-nota="Aplicar al trabajo|Abre un formulario para enviar la postulación con CV y carta de presentación.">
+        <div class="tl-card p-4 mb-4 detail-aside-card" style="position:sticky;top:140px" data-nota="Aplicar al trabajo|Abre un formulario para enviar la postulación con CV y carta de presentación.">
           <div class="text-muted small">Salario mensual</div>
           <div class="h4 fw-bold text-primary">${UI.salario(empleo)}</div>
           <div class="small text-muted mb-3"><i class="bi bi-people"></i> ${Store.get('postulaciones').filter((p) => p.empleoId === empleo.id).length + 12} personas ya aplicaron</div>
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </aside>
     </div>
 
-    ${similares.length ? `<section class="mt-5"><h2 class="tl-section-title mb-3">Empleos similares</h2><div class="row g-3">${similares.map((e) => `<div class="col-lg-4">${UI.jobCard(e)}</div>`).join('')}</div></section>` : ''}
+    ${similares.length ? `    <section class="mt-5 detail-related"><h2 class="tl-section-title mb-3">Otras oportunidades para ti</h2><div class="row g-3">${similares.map((e) => `<div class="col-lg-4">${UI.jobCard(e)}</div>`).join('')}</div></section>` : ''}
   `;
 
   // ---------- Botón aplicar (cambia si ya aplicó) ----------
@@ -104,13 +105,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Precargar datos del usuario en el formulario
   document.getElementById('aplicar-titulo').textContent = `Aplicar a: ${empleo.titulo}`;
-  if (sesion) { document.getElementById('ap-nombre').value = sesion.nombre; document.getElementById('ap-email').value = sesion.email; }
+  if (sesion) {
+    document.getElementById('ap-nombre').value = sesion.nombre;
+    document.getElementById('ap-email').value = sesion.email;
+  } else if (usuarioActual) {
+    document.getElementById('ap-nombre').value = `${usuarioActual.nombre} ${usuarioActual.apellidos}`.trim();
+    document.getElementById('ap-email').value = usuarioActual.email || '';
+  }
+  document.getElementById('ap-telefono').value = usuarioActual?.telefono || '';
 
   document.getElementById('form-aplicar').addEventListener('submit', (ev) => {
     ev.preventDefault();
-    // INSERT INTO postulaciones (...)
-    Store.add('postulaciones', { empleoId: empleo.id, usuarioId: sesion?.id || 1, fecha: new Date().toISOString(), estado: 'Recibida', carta: document.getElementById('ap-carta').value, propia: true });
-    bootstrap.Modal.getInstance(document.getElementById('modal-aplicar')).hide();
+    const archivoCV = document.getElementById('ap-cv').files[0];
+    if (archivoCV && !/\.(pdf|docx?)$/i.test(archivoCV.name)) {
+      UI.toast('Adjunta un currículum PDF o DOCX', 'warning');
+      return;
+    }
+    const partesNombre = document.getElementById('ap-nombre').value.trim().split(/\s+/);
+    const usuarioId = sesion?.id || 1;
+    Store.update('usuarios', usuarioId, {
+      nombre: partesNombre[0],
+      apellidos: partesNombre.slice(1).join(' '),
+      email: document.getElementById('ap-email').value.trim(),
+      telefono: document.getElementById('ap-telefono').value.trim(),
+      ...(archivoCV ? { cv: archivoCV.name } : {})
+    });
+    Store.add('postulaciones', {
+      empleoId: empleo.id,
+      usuarioId,
+      fecha: new Date().toISOString(),
+      estado: 'Recibida',
+      carta: document.getElementById('ap-carta').value,
+      cvAdjunto: archivoCV?.name || usuarioActual?.cv || '',
+      propia: true
+    });
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-aplicar')).hide();
     UI.toast('¡Postulación enviada! Puedes darle seguimiento en "Mi perfil".');
     pintarBotonAplicar();
   });

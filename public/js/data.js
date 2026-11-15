@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  T-Search - DATOS INICIALES Y SINCRONIZACIÓN CON POSTGRESQL
+ *  ChambeaSV - DATOS INICIALES Y SINCRONIZACIÓN CON POSTGRESQL
  * ============================================================
  *  Estos arreglos representan los datos semilla de las TABLAS
  *  de la base de datos en Supabase:
@@ -100,7 +100,7 @@ const DATOS_INICIALES = {
     { id: 3, nombre: 'Ana', apellidos: 'Rodríguez', email: 'ana@correo.com', telefono: '+502 5555-1212', rol: 'candidato', titular: 'Enfermera Profesional', ubicacion: 'Guatemala, GT', habilidades: ['Atención al paciente', 'Primeros auxilios'], estado: 'Activo', registro: haceNDias(20) },
     { id: 4, nombre: 'Luis', apellidos: 'Hernández', email: 'luis@correo.com', telefono: '+503 7777-8888', rol: 'candidato', titular: 'Diseñador Gráfico', ubicacion: 'San Salvador, SV', habilidades: ['Illustrator', 'Figma', 'Branding'], estado: 'Suspendido', registro: haceNDias(15) },
     { id: 5, nombre: 'Recursos Humanos', apellidos: 'Nexo Digital', email: 'empresa@nexodigital.com', telefono: '+504 2234-5678', rol: 'empresa', titular: 'Reclutador', ubicacion: 'Tegucigalpa, HN', habilidades: [], estado: 'Activo', registro: haceNDias(60) },
-    { id: 6, nombre: 'Admin', apellidos: 'T-Search', email: 'admin@tsearch.com', telefono: '', rol: 'admin', titular: 'Administrador', ubicacion: '', habilidades: [], estado: 'Activo', registro: haceNDias(90) },
+    { id: 6, nombre: 'Admin', apellidos: 'ChambeaSV', email: 'admin@tsearch.com', telefono: '', rol: 'admin', titular: 'Administrador', ubicacion: '', habilidades: [], estado: 'Activo', registro: haceNDias(90) },
     { id: 7, nombre: 'Sofía', apellidos: 'Castillo', email: 'sofia@correo.com', telefono: '+506 8888-1111', rol: 'candidato', titular: 'Ingeniera Eléctrica', ubicacion: 'San José, CR', habilidades: ['AutoCAD', 'PVsyst', 'Gestión de proyectos'], estado: 'Activo', registro: haceNDias(8) }
   ],
 
@@ -172,7 +172,7 @@ const DATOS_INICIALES = {
     { id: 1, titulo: 'El empleo tecnológico crece 18% en Centroamérica', fecha: haceNDias(1), fuente: 'Observatorio Laboral', resumen: 'La demanda de desarrolladores y analistas de datos sigue en aumento.' },
     { id: 2, titulo: 'Nuevas regulaciones para el teletrabajo en la región', fecha: haceNDias(3), fuente: 'Diario Económico', resumen: 'Los gobiernos actualizan las leyes para proteger a trabajadores remotos.' },
     { id: 3, titulo: 'Las energías renovables generarán 50,000 empleos', fecha: haceNDias(6), fuente: 'Revista Energía', resumen: 'Ingenieros y técnicos serán los perfiles más solicitados.' },
-    { id: 4, titulo: 'Ferias de empleo virtuales: fechas de noviembre', fecha: haceNDias(8), fuente: 'T-Search', resumen: 'Más de 120 empresas participarán en las próximas ferias en línea.' }
+    { id: 4, titulo: 'Ferias de empleo virtuales: fechas de noviembre', fecha: haceNDias(8), fuente: 'ChambeaSV', resumen: 'Más de 120 empresas participarán en las próximas ferias en línea.' }
   ]
 };
 
@@ -197,7 +197,9 @@ const Store = {
   add(tabla, registro) {
     const datos = this.get(tabla);
     registro.id = datos.length ? Math.max(...datos.map((r) => r.id)) + 1 : 1;
-    datos.unshift(registro);
+    const registroLocal = { ...registro };
+    delete registroLocal.password;
+    datos.unshift(registroLocal);
     this.set(tabla, datos);
 
     // Persistencia asíncrona en Supabase PostgreSQL
@@ -206,16 +208,19 @@ const Store = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(registro)
     })
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+        return r.json();
+      })
       .then((creado) => {
         if (creado && creado.id) {
-          const actualizados = this.get(tabla).map((x) => (x.id === registro.id ? { ...x, ...creado } : x));
+          const actualizados = this.get(tabla).map((x) => (x.id === registroLocal.id ? { ...x, ...creado } : x));
           this.set(tabla, actualizados);
         }
       })
       .catch((err) => console.warn(`Error guardando en PostgreSQL (${tabla}):`, err.message));
 
-    return registro;
+    return registroLocal;
   },
   update(tabla, id, cambios) {
     const datos = this.get(tabla).map((r) => (r.id === Number(id) ? { ...r, ...cambios } : r));
@@ -226,19 +231,26 @@ const Store = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(cambios)
-    }).catch((err) => console.warn(`Error actualizando en PostgreSQL (${tabla}/${id}):`, err.message));
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+      })
+      .catch((err) => console.warn(`Error actualizando en PostgreSQL (${tabla}/${id}):`, err.message));
   },
   remove(tabla, id) {
     this.set(tabla, this.get(tabla).filter((r) => r.id !== Number(id)));
 
     // Eliminación asíncrona en Supabase PostgreSQL
     fetch(`/api/${tabla}/${id}`, { method: 'DELETE' })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+      })
       .catch((err) => console.warn(`Error eliminando en PostgreSQL (${tabla}/${id}):`, err.message));
   },
   async syncFromDB() {
     try {
       const res = await fetch('/api/sync');
-      if (!res.ok) return false;
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const json = await res.json();
       if (json.ok && json.datos) {
         const huboCambios = Object.entries(json.datos).some(([tabla, filas]) => {
@@ -257,8 +269,9 @@ const Store = {
         }
         return true;
       }
-    } catch (_) {
-      // Modo offline / localStorage fallback
+    } catch (err) {
+      console.warn('PostgreSQL no disponible; se mantienen los datos locales:', err.message);
+      return false;
     }
     return false;
   },
@@ -266,6 +279,10 @@ const Store = {
     Object.keys(localStorage).filter((k) => k.startsWith(this.PREFIX)).forEach((k) => localStorage.removeItem(k));
     sessionStorage.removeItem('tl_db_synced');
     fetch('/api/reset', { method: 'POST' })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+      })
+      .catch((err) => console.warn('No se pudo reiniciar PostgreSQL; se restablecen los datos locales:', err.message))
       .finally(() => location.reload());
   }
 };

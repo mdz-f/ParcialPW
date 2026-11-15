@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('f-ubicacion').value = UI.param('ubicacion') || '';
   document.getElementById('f-tipo').value = UI.param('tipo') || '';
   document.getElementById('f-salario').value = UI.param('salario') || 0;
-  ['nivel', 'sector', 'modalidad'].forEach((campo) => {
+  ['nivel', 'sector', 'contrato', 'modalidad'].forEach((campo) => {
     const v = UI.param(campo);
     if (v) document.querySelectorAll(`.filtro[data-campo="${campo}"]`).forEach((c) => { if (c.value === v) c.checked = true; });
   });
