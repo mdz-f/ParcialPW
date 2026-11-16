@@ -315,7 +315,7 @@ aside .tl-nota {
 body.modo-notas .tl-nota { display: block; animation: fadeIn .25s ease; }
 
 .tl-notas-btn {
-  position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 2000;
+  position: fixed; bottom: 1.25rem; left: 1.25rem; right: auto; z-index: 1040;
   background: #f59f00; color: #fff; border: 0; border-radius: 999px; padding: .7rem 1.1rem;
   font-weight: 600; font-size: .88rem; box-shadow: 0 8px 24px rgba(245, 159, 0, .4);
   display: flex; align-items: center; gap: .45rem; transition: transform .15s;
@@ -533,7 +533,8 @@ body { background: #f5f7fb; color: #17243b; }
 }
 .tl-notas-btn {
   bottom: 1rem;
-  right: 1rem;
+  left: 1rem;
+  right: auto;
   padding: .55rem .85rem;
   background: #19385e;
   box-shadow: 0 8px 22px rgba(17, 43, 77, .22);

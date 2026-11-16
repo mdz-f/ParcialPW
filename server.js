@@ -6,28 +6,15 @@
  *  y expone la API REST conectada a la base de datos en Supabase.
  * ============================================================
  */
-<<<<<<< HEAD
-require('dotenv').config({ quiet: true });
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const db = require('./database/db');
-
-const app = express();
-// Evita que si PORT quedó en 5432 o 6543 (puertos de PostgreSQL) se use para el servidor web
-const rawPort = Number(process.env.APP_PORT || process.env.PORT || 3000);
-const PORT = (rawPort === 5432 || rawPort === 6543) ? 3000 : rawPort;
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-=======
 require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const db = require('./database/db');
 const app = require('./src/app');
-const PORT = Number(process.env.APP_PORT) || 3000;
->>>>>>> d3dc537 (Modificaciones iniciales de sistema y ajustes de entorno)
+
+// Evita que si PORT quedó en 5432 o 6543 (puertos de PostgreSQL) se use para el servidor web
+const rawPort = Number(process.env.APP_PORT || process.env.PORT || 3000);
+const PORT = (rawPort === 5432 || rawPort === 6543) ? 3000 : rawPort;
 
 /* ------------------------------------------------------------
    Mapeadores entre columnas PostgreSQL (snake_case)
@@ -435,12 +422,12 @@ app.use((req, res) => {
 });
 
 const server = app.listen(PORT, async () => {
-  console.log(`✅ ChambeaSV corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor ChambeaSV corriendo en http://localhost:${PORT}`);
   try {
     const info = await db.verificarConexion();
-    console.log(`🗄️  Conectado a Supabase PostgreSQL [${info.host}] (${info.tablasCreadas}/${info.totalEsperadas} tablas detectadas)`);
+    console.log(`🗿 Conectado a Supabase PostgreSQL [${info.host}] (${info.tablasCreadas}/${info.totalEsperadas} tablas detectadas)`);
   } catch (err) {
-    console.warn(`⚠️  Aviso de conexión a Supabase: ${err.message}`);
+    console.warn(`Aviso de conexión a Supabase: ${err.message}`);
   }
 });
 

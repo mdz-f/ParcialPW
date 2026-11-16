@@ -1,5 +1,5 @@
 const { promisify } = require('util');
-const { randomBytes, scrypt } = require('crypto');
+const { randomBytes, scrypt, timingSafeEqual } = require('crypto');
 const db = require('../../database/db');
 
 const scryptAsync = promisify(scrypt);
@@ -25,6 +25,37 @@ async function listar() {
 async function buscarPorId(id) {
   const result = await db.query('SELECT * FROM usuarios WHERE id = $1', [id]);
   return result.rows[0] || null;
+}
+
+async function buscarPorEmail(email) {
+  if (!email) return null;
+  const result = await db.query(
+    'SELECT * FROM usuarios WHERE LOWER(email) = LOWER($1)',
+    [String(email).trim()]
+  );
+  return result.rows[0] || null;
+}
+
+async function verificarPassword(passwordPlano, passwordHash) {
+  if (!passwordPlano || !passwordHash) return false;
+
+  // Formato seguro scrypt: scrypt$salt$hashHex
+  if (typeof passwordHash === 'string' && passwordHash.startsWith('scrypt$')) {
+    const partes = passwordHash.split('$');
+    if (partes.length !== 3) return false;
+    const [, salt, hashHex] = partes;
+    try {
+      const derivedKey = await scryptAsync(passwordPlano, salt, 64);
+      const hashBuffer = Buffer.from(hashHex, 'hex');
+      if (derivedKey.length !== hashBuffer.length) return false;
+      return timingSafeEqual(derivedKey, hashBuffer);
+    } catch {
+      return false;
+    }
+  }
+
+  // Compatibilidad con contraseñas planas de datos semilla iniciales (ej. '123456')
+  return passwordPlano === passwordHash;
 }
 
 async function crear(usuario) {
@@ -79,4 +110,12 @@ async function eliminar(id) {
   return result.rowCount > 0;
 }
 
-module.exports = { listar, buscarPorId, crear, actualizar, eliminar };
+module.exports = {
+  listar,
+  buscarPorId,
+  buscarPorEmail,
+  verificarPassword,
+  crear,
+  actualizar,
+  eliminar
+};

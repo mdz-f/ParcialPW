@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso y Registro | ChambeaSV - Tu Comunidad Profesional</title>
+
+  <!-- Tipografía Inter & Iconos de Bootstrap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Estilos del proyecto y módulo de Autenticación -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-split-wrapper">
+
+    <!-- COLUMNA IZQUIERDA: Formulario de Login / Registro -->
+    <div class="auth-form-side">
+      <div class="auth-form-card">
+
+        <!-- Logotipo de ChambeaSV -->
+        <a href="index.html" class="auth-brand d-inline-flex align-items-center gap-2 text-decoration-none mb-3" aria-label="Volver a la portada de ChambeaSV">
+          <svg class="chambea-logo-icon" width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M 84 30 A 39 39 0 1 0 84 70 L 68.5 59.5 A 21.5 21.5 0 1 1 68.5 40.5 Z" fill="#0056FF"/>
+            <path d="M 39.5 44 C 38 53.5 43.5 62 53.5 62.5 C 61 63 66 57.5 67 51" fill="none" stroke="#00D68F" stroke-width="7.2" stroke-linecap="round"/>
+            <circle cx="53.5" cy="44.5" r="9.5" fill="#00D68F"/>
+            <rect x="50" y="42" width="2.4" height="3.8" rx="1.2" fill="#0B213F"/>
+            <rect x="54.6" y="42" width="2.4" height="3.8" rx="1.2" fill="#0B213F"/>
+          </svg>
+          <span class="fw-bold" style="color:#0B213F; font-size:1.45rem; letter-spacing:-0.03em;">Chambea<span style="color:#0056FF;">SV</span></span>
+        </a>
+
+        <span class="auth-eyebrow-dark">Qué bueno tenerte aquí</span>
+
+        <!-- Encabezado de Bienvenida Dinámico -->
+        <h1 class="auth-title" id="auth-page-title">¡Te damos la bienvenida a tu comunidad profesional!</h1>
+        <p class="auth-subtitle" id="auth-page-subtitle">Conecta con oportunidades laborales de calidad o encuentra al mejor talento de El Salvador.</p>
+
+        <!-- Conmutador de Pestañas -->
+        <div class="auth-nav-tabs" role="tablist">
+          <button class="auth-tab-btn active" data-tab="login" type="button" id="tab-login-btn">
+            Iniciar sesión
+          </button>
+          <button class="auth-tab-btn" data-tab="registro" type="button" id="tab-registro-btn">
+            Crear cuenta
+          </button>
+        </div>
+
+        <!-- PANEL 1: INICIAR SESIÓN -->
+        <div id="pane-auth-login" class="auth-pane active">
+          <!-- Alerta dinámica -->
+          <div id="auth-login-alert" class="auth-alert" role="alert"></div>
+
+          <form id="form-auth-login" novalidate>
+            <!-- Campo Correo -->
+            <label class="auth-label" for="login-email-input">Correo electrónico</label>
+            <div class="auth-input-group">
+              <i class="bi bi-envelope auth-icon"></i>
+              <input type="email" id="login-email-input" class="form-control" placeholder="ejemplo@correo.com" required autocomplete="email">
+            </div>
+
+            <!-- Campo Contraseña -->
+            <div class="auth-label-row">
+              <label class="auth-label" for="login-pass-input">Contraseña</label>
+              <a href="#" class="auth-link" onclick="alert('Contacta al soporte para restablecer tu contraseña en el entorno local.'); return false;">¿La olvidaste?</a>
+            </div>
+            <div class="auth-input-group">
+              <i class="bi bi-lock auth-icon"></i>
+              <input type="password" id="login-pass-input" class="form-control" placeholder="Ingresa tu contraseña" required autocomplete="current-password">
+              <button type="button" class="auth-toggle-pass" data-target="login-pass-input" aria-label="Mostrar u ocultar contraseña">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+            </div>
+
+            <!-- Recordarme -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="check-remember" checked>
+              <label class="form-check-label" for="check-remember">Mantener mi sesión activa</label>
+            </div>
+
+            <!-- Botón de Entrada -->
+            <button type="submit" class="btn btn-auth-submit">
+              <span>Iniciar sesión</span>
+              <i class="bi bi-arrow-right"></i>
+            </button>
+
+            <!-- Enlace alternativo para cambiar a registro -->
+            <p class="auth-switch-text">
+              ¿No tienes cuenta aún? <a href="login.html?mode=register" id="link-a-registro" class="auth-link">Regístrate gratis</a>
+            </p>
+          </form>
+
+          <!-- Accesos rápidos para evaluación del sistema -->
+          <div class="auth-demo-chips">
+            <div class="auth-demo-title">Cuentas listas para prueba</div>
+            <div class="auth-demo-list">
+              <button type="button" class="badge-demo" onclick="AuthModule.autocompletar('maria@correo.com')">
+                <i class="bi bi-person"></i> Candidata (María)
+              </button>
+              <button type="button" class="badge-demo" onclick="AuthModule.autocompletar('empresa@nexodigital.com')">
+                <i class="bi bi-building"></i> Empresa (Nexo)
+              </button>
+              <button type="button" class="badge-demo" onclick="AuthModule.autocompletar('admin@tsearch.com')">
+                <i class="bi bi-shield-lock"></i> Administrador
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL 2: REGISTRO DE CUENTA -->
+        <div id="pane-auth-registro" class="auth-pane">
+          <!-- Alerta dinámica -->
+          <div id="auth-registro-alert" class="auth-alert" role="alert"></div>
+
+          <form id="form-auth-registro" novalidate>
+            <!-- Selector de Rol -->
+            <span class="auth-label">¿Cómo deseas usar ChambeaSV?</span>
+            <div class="auth-role-selector">
+              <label>
+                <input type="radio" name="auth-reg-rol" value="candidato" class="auth-sr-only" checked>
+                <div class="auth-role-card">
+                  <i class="bi bi-person-workspace"></i>
+                  <span>Busco empleo</span>
+                </div>
+              </label>
+              <label>
+                <input type="radio" name="auth-reg-rol" value="empresa" class="auth-sr-only">
+                <div class="auth-role-card">
+                  <i class="bi bi-buildings"></i>
+                  <span>Soy empresa</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Nombre Completo / Empresa -->
+            <label class="auth-label" for="reg-nombre-input">Nombre completo o de la empresa</label>
+            <div class="auth-input-group">
+              <i class="bi bi-person auth-icon"></i>
+              <input type="text" id="reg-nombre-input" class="form-control" placeholder="Ej. Roberto Sánchez" required>
+            </div>
+
+            <!-- Correo Electrónico -->
+            <label class="auth-label" for="reg-email-input">Correo electrónico</label>
+            <div class="auth-input-group">
+              <i class="bi bi-envelope auth-icon"></i>
+              <input type="email" id="reg-email-input" class="form-control" placeholder="tu@correo.com" required autocomplete="email">
+            </div>
+
+            <!-- Contraseña -->
+            <label class="auth-label" for="reg-pass-input">Contraseña <span class="auth-label-hint">(mínimo 6 caracteres)</span></label>
+            <div class="auth-input-group">
+              <i class="bi bi-lock auth-icon"></i>
+              <input type="password" id="reg-pass-input" class="form-control" placeholder="Crea una contraseña segura" minlength="6" required autocomplete="new-password">
+              <button type="button" class="auth-toggle-pass" data-target="reg-pass-input" aria-label="Mostrar u ocultar contraseña">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+            </div>
+
+            <!-- Términos y Condiciones -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="check-terms" required checked>
+              <label class="form-check-label" for="check-terms">
+                Acepto las <a href="#" class="auth-link">Condiciones de uso</a> y la <a href="#" class="auth-link">Política de privacidad</a>.
+              </label>
+            </div>
+
+            <!-- Botón de Registro -->
+            <button type="submit" class="btn btn-auth-submit">
+              <span>Crear cuenta gratis</span>
+              <i class="bi bi-check2-circle"></i>
+            </button>
+
+            <!-- Enlace alternativo para cambiar a login -->
+            <p class="auth-switch-text">
+              ¿Ya tienes una cuenta? <a href="login.html" id="link-a-login" class="auth-link">Inicia sesión</a>
+            </p>
+          </form>
+        </div>
+
+        <p class="auth-trust"><i class="bi bi-lock-fill"></i> Un espacio para avanzar con confianza.</p>
+
+        <a href="index.html" class="auth-back-link">
+          <i class="bi bi-arrow-left"></i> Volver a la página principal
+        </a>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Panel fotográfico -->
+    <!-- Para cambiar la foto, edita --auth-photo al inicio de css/auth.css -->
+    <div class="auth-visual-side">
+      <div class="auth-photo" role="img" aria-label="Espacio de trabajo moderno y luminoso"></div>
+
+      <div class="auth-visual-top">
+        <span class="auth-chip">ChambeaSV · Comunidad profesional</span>
+        <a href="index.html" class="auth-round-link" aria-label="Explorar vacantes">
+          <i class="bi bi-arrow-up-right"></i>
+        </a>
+      </div>
+
+      <div class="auth-visual-text">
+        <span class="auth-eyebrow">Conexiones que impulsan</span>
+        <h3>Tu próximo paso profesional empieza hoy</h3>
+        <p>Accede a vacantes exclusivas, interactúa en foros comunitarios y conecta directamente con los líderes de recursos humanos de la región.</p>
+        <div class="auth-visual-meta">
+          <strong>+500 empresas activas</strong>
+          <span>Contratando en El Salvador</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

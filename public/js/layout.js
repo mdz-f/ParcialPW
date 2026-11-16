@@ -16,25 +16,44 @@
  */
 
 /* ------------------------------------------------------------
-   SESIÓN SIMULADA
-   El rol se decide por el correo para facilitar la demo:
-     - contiene "admin"   -> administrador
-     - contiene "empresa" -> empleador
-     - cualquier otro     -> candidato
+   SESIÓN CONECTADA A SUPABASE
+   Guarda y lee la sesión real activa en localStorage
    ------------------------------------------------------------ */
 const Sesion = {
   get() { return JSON.parse(localStorage.getItem('tl_sesion') || 'null'); },
-  login(email, nombre) {
-    let rol = 'candidato';
-    if (email.includes('admin')) rol = 'admin';
-    else if (email.includes('empresa')) rol = 'empresa';
-    // Si el correo existe en los usuarios simulados, se usan sus datos
-    const u = Store.get('usuarios').find((x) => x.email === email);
-    const sesion = u
-      ? { id: u.id, nombre: `${u.nombre} ${u.apellidos}`, email, rol: u.rol }
-      : { id: 1, nombre: nombre || email.split('@')[0], email, rol };
+  set(usuario) {
+    const sesion = {
+      id: usuario.id,
+      nombre: `${usuario.nombre} ${usuario.apellidos || ''}`.trim(),
+      email: usuario.email,
+      rol: usuario.rol
+    };
     localStorage.setItem('tl_sesion', JSON.stringify(sesion));
     return sesion;
+  },
+  async login(email, password) {
+    const res = await fetch('/api/usuarios/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || 'Credenciales inválidas');
+    }
+    return this.set(data.usuario);
+  },
+  async registro(payload) {
+    const res = await fetch('/api/usuarios/registro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || 'Error en el registro');
+    }
+    return this.set(data.usuario);
   },
   logout() { localStorage.removeItem('tl_sesion'); location.href = 'index.html'; }
 };
@@ -164,7 +183,7 @@ function renderHeader() {
   const s = Sesion.get();
   const pagina = document.body.dataset.page;
 
-  // Zona derecha: formulario de login o menú del usuario autenticado
+  // Zona derecha: botones directos a login.html o menú del usuario autenticado
   const zonaUsuario = s
     ? `<div class="dropdown">
          <button class="btn btn-light d-flex align-items-center gap-2 border" data-bs-toggle="dropdown" id="btn-menu-usuario">
@@ -179,13 +198,10 @@ function renderHeader() {
            <li><a class="dropdown-item text-danger" href="#" id="btn-logout"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</a></li>
          </ul>
        </div>`
-    : `<form class="tl-login-form d-none d-lg-flex align-items-center gap-2" id="form-login-header">
-         <input type="email" class="form-control form-control-sm" placeholder="Correo electrónico" id="login-email" required>
-         <input type="password" class="form-control form-control-sm" placeholder="Contraseña" id="login-pass" required>
-         <button class="btn btn-sm btn-outline-primary px-3" type="submit" id="btn-login">Entrar</button>
-       </form>
-       <button class="btn btn-sm btn-outline-primary d-lg-none" data-bs-toggle="modal" data-bs-target="#modal-auth" id="btn-login-movil">Entrar</button>
-       <button class="btn btn-sm btn-primary px-3" data-bs-toggle="modal" data-bs-target="#modal-auth" data-tab="registro" id="btn-registro">Registrarse</button>`;
+    : `<div class="d-flex align-items-center gap-2">
+         <a href="login.html" class="btn btn-outline-primary btn-sm px-3 fw-semibold" id="btn-login-nav">Entrar</a>
+         <a href="login.html?mode=register" class="btn btn-primary btn-sm px-3 fw-semibold" id="btn-registro-nav">Registrarse</a>
+       </div>`;
 
   const secciones = [
     ['inicio', 'index.html', 'bi-house', 'Inicio'],
@@ -199,9 +215,18 @@ function renderHeader() {
   ];
 
   document.getElementById('tl-header').innerHTML = `
-    <header class="tl-header" data-nota="Encabezado|Logo de ChambeaSV, formulario de inicio de sesión y botón para registrarse en el sitio.">
+    <header class="tl-header" data-nota="Encabezado|Logo de ChambeaSV y accesos a iniciar sesión o registrarse.">
       <div class="container d-flex align-items-center justify-content-between py-2 gap-3">
-        <a href="index.html" class="tl-logo" id="logo" aria-label="ChambeaSV, inicio"><div class="tl-logo-icon"><i class="bi bi-briefcase-fill"></i></div><span>Chambea<b>SV</b></span></a>
+        <a href="index.html" class="navbar-brand tl-logo d-flex align-items-center gap-2 text-decoration-none" id="logo" aria-label="ChambeaSV, inicio">
+          <svg class="chambea-logo-icon" width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M 84 30 A 39 39 0 1 0 84 70 L 68.5 59.5 A 21.5 21.5 0 1 1 68.5 40.5 Z" fill="#0056FF"/>
+            <path d="M 39.5 44 C 38 53.5 43.5 62 53.5 62.5 C 61 63 66 57.5 67 51" fill="none" stroke="#00D68F" stroke-width="7.2" stroke-linecap="round"/>
+            <circle cx="53.5" cy="44.5" r="9.5" fill="#00D68F"/>
+            <rect x="50" y="42" width="2.4" height="3.8" rx="1.2" fill="#0B213F"/>
+            <rect x="54.6" y="42" width="2.4" height="3.8" rx="1.2" fill="#0B213F"/>
+          </svg>
+          <span class="fw-bold" style="color:#0B213F; font-size:1.35rem; letter-spacing:-0.03em;">Chambea<span style="color:#0056FF;">SV</span></span>
+        </a>
         <div class="d-flex align-items-center gap-2">${zonaUsuario}</div>
       </div>
       <nav class="tl-nav" data-nota="Barra de navegación|Acceso a búsqueda de trabajo, publicar empleos, recursos, valoraciones, foros, mi perfil y administración.">
@@ -214,95 +239,8 @@ function renderHeader() {
       </nav>
     </header>`;
 
-  // Eventos del encabezado
-  const formLogin = document.getElementById('form-login-header');
-  if (formLogin) formLogin.addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const s2 = Sesion.login(document.getElementById('login-email').value);
-    UI.toast(`¡Bienvenido(a), ${s2.nombre}!`);
-    setTimeout(() => location.reload(), 600);
-  });
   const btnLogout = document.getElementById('btn-logout');
   if (btnLogout) btnLogout.addEventListener('click', (ev) => { ev.preventDefault(); Sesion.logout(); });
-}
-
-/* ------------------------------------------------------------
-   MODAL DE INICIO DE SESIÓN / REGISTRO
-   ------------------------------------------------------------ */
-function renderAuthModal() {
-  const div = document.createElement('div');
-  div.innerHTML = `
-  <div class="modal fade" id="modal-auth" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 rounded-4">
-        <div class="modal-header border-0 pb-0">
-          <ul class="nav nav-pills gap-1" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-login" id="tab-btn-login">Iniciar sesión</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-registro" id="tab-btn-registro">Registrarse</button></li>
-          </ul>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="tab-content">
-            <!-- Iniciar sesión -->
-            <div class="tab-pane fade show active" id="tab-login">
-              <form id="form-login-modal">
-                <div class="mb-3"><label class="form-label">Correo</label><input type="email" class="form-control" id="modal-login-email" required></div>
-                <div class="mb-3"><label class="form-label">Contraseña</label><input type="password" class="form-control" required></div>
-                <button class="btn btn-primary w-100">Entrar</button>
-              </form>
-            </div>
-            <!-- Registro: candidato o empresa -->
-            <div class="tab-pane fade" id="tab-registro">
-              <form id="form-registro">
-                <div class="btn-group w-100 mb-3" role="group">
-                  <input type="radio" class="btn-check" name="tipo-cuenta" id="tipo-candidato" value="candidato" checked>
-                  <label class="btn btn-outline-primary" for="tipo-candidato"><i class="bi bi-person me-1"></i>Busco empleo</label>
-                  <input type="radio" class="btn-check" name="tipo-cuenta" id="tipo-empresa" value="empresa">
-                  <label class="btn btn-outline-primary" for="tipo-empresa"><i class="bi bi-building me-1"></i>Soy empresa</label>
-                </div>
-                <div class="mb-3"><label class="form-label">Nombre completo / Empresa</label><input class="form-control" id="reg-nombre" required></div>
-                <div class="mb-3"><label class="form-label">Correo</label><input type="email" class="form-control" id="reg-email" required></div>
-                <div class="mb-3"><label class="form-label">Contraseña</label><input type="password" class="form-control" id="reg-password" minlength="8" required></div>
-                <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="reg-terminos" required><label class="form-check-label small" for="reg-terminos">Acepto los términos y la política de privacidad</label></div>
-                <button class="btn btn-primary w-100">Crear cuenta</button>
-              </form>
-            </div>
-          </div>
-          <div class="alert alert-light border small mt-3 mb-0">
-            <b><i class="bi bi-info-circle"></i> Cuentas demo:</b><br>
-            maria@correo.com (candidato) · empresa@nexodigital.com (empresa) · admin@tsearch.com (admin). Cualquier contraseña.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>`;
-  document.body.appendChild(div);
-
-  const modal = document.getElementById('modal-auth');
-  // Abrir directamente la pestaña de registro si se presionó "Registrarse"
-  modal.addEventListener('show.bs.modal', (ev) => {
-    const tab = ev.relatedTarget?.dataset.tab === 'registro' ? 'tab-btn-registro' : 'tab-btn-login';
-    bootstrap.Tab.getOrCreateInstance(document.getElementById(tab)).show();
-  });
-  document.getElementById('form-login-modal').addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    Sesion.login(document.getElementById('modal-login-email').value);
-    location.reload();
-  });
-  document.getElementById('form-registro').addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const rol = document.querySelector('input[name="tipo-cuenta"]:checked').value;
-    const nombre = document.getElementById('reg-nombre').value;
-    const email = document.getElementById('reg-email').value;
-    const password = document.getElementById('reg-password').value;
-    // Se "inserta" el usuario en la tabla simulada
-    const partes = nombre.split(' ');
-    Store.add('usuarios', { nombre: partes[0], apellidos: partes.slice(1).join(' '), email, password, telefono: '', rol, titular: '', ubicacion: '', habilidades: [], estado: 'Activo', registro: new Date().toISOString() });
-    localStorage.setItem('tl_sesion', JSON.stringify({ id: 1, nombre, email, rol }));
-    UI.toast('¡Cuenta creada con éxito!');
-    setTimeout(() => (location.href = rol === 'empresa' ? 'empresa.html' : 'perfil.html'), 700);
-  });
 }
 
 /* ------------------------------------------------------------
@@ -316,8 +254,17 @@ function renderFooter() {
       <div class="container">
         <div class="row g-4">
           <div class="col-lg-4">
-            <a href="index.html" class="tl-logo mb-3"><div class="tl-logo-icon"><i class="bi bi-briefcase-fill"></i></div><span>Chambea<b>SV</b></span></a>
-              <p class="small">Conectamos talento salvadoreño con oportunidades. Un espacio para encontrar empleo y descubrir perfiles profesionales.</p>
+            <a href="index.html" class="tl-logo d-flex align-items-center gap-2 text-decoration-none mb-3">
+              <svg class="chambea-logo-icon" width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M 84 30 A 39 39 0 1 0 84 70 L 68.5 59.5 A 21.5 21.5 0 1 1 68.5 40.5 Z" fill="#0056FF"/>
+                <path d="M 39.5 44 C 38 53.5 43.5 62 53.5 62.5 C 61 63 66 57.5 67 51" fill="none" stroke="#00D68F" stroke-width="7.2" stroke-linecap="round"/>
+                <circle cx="53.5" cy="44.5" r="9.5" fill="#00D68F"/>
+                <rect x="50" y="42" width="2.4" height="3.8" rx="1.2" fill="#0B213F"/>
+                <rect x="54.6" y="42" width="2.4" height="3.8" rx="1.2" fill="#0B213F"/>
+              </svg>
+              <span class="fw-bold" style="color:#0B213F; font-size:1.3rem; letter-spacing:-0.03em;">Chambea<span style="color:#0056FF;">SV</span></span>
+            </a>
+            <p class="small">Conectamos talento salvadoreño con oportunidades. Un espacio para encontrar empleo y descubrir perfiles profesionales.</p>
             <div class="d-flex gap-3 fs-5"><i class="bi bi-facebook"></i><i class="bi bi-linkedin"></i><i class="bi bi-instagram"></i><i class="bi bi-twitter-x"></i></div>
           </div>
           <div class="col-6 col-lg-2"><h6>Candidatos</h6><a href="empleos.html">Buscar empleos</a><a href="perfil.html">Mi perfil</a><a href="perfil.html#alertas">Alertas</a><a href="recursos.html">Recursos</a></div>
@@ -373,10 +320,35 @@ const Notas = {
 };
 
 /* ------------------------------------------------------------
+   CARGA DEL AGENTE FLOTANTE CHAMBITA AI
+   ------------------------------------------------------------ */
+function asegurarRecursosChatbot() {
+  if (!document.querySelector('link[href*="chatbot.css"]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'css/chatbot.css';
+    document.head.appendChild(link);
+  }
+  if (!document.querySelector('script[src*="chatbot.js"]')) {
+    const script = document.createElement('script');
+    script.src = 'js/chatbot.js';
+    script.onload = () => {
+      if (window.ChambitaChatbot) {
+        window.ChambitaChatbot.init();
+      }
+    };
+    document.body.appendChild(script);
+  } else if (window.ChambitaChatbot) {
+    window.ChambitaChatbot.init();
+  }
+}
+
+/* ------------------------------------------------------------
    INICIALIZACIÓN COMÚN
    ------------------------------------------------------------ */
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('tl-header')) { renderHeader(); renderAuthModal(); }
+  if (document.getElementById('tl-header')) { renderHeader(); }
   renderFooter();
   Notas.init();
+  asegurarRecursosChatbot();
 });
