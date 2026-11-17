@@ -13,7 +13,15 @@
 const ESTADOS = ['Recibida', 'En revisión', 'Entrevista', 'Contratado', 'Rechazada'];
 
 // Empresas que administra el usuario actual
-const misEmpresas = () => Store.get('empresas').filter((e) => e.id === 1 || e.propia);
+const misEmpresas = () => {
+  const s = Sesion.get();
+  const uid = s ? s.id : null;
+  return Store.get('empresas').filter((e) => {
+    if (uid) return e.usuarioId === uid || (e.propia && e.usuarioId === null && uid === 5);
+    // Modo demo sin sesión: mostrar Nexo Digital y empresas propias
+    return e.id === 1 || e.propia;
+  });
+};
 const misOfertas = () => { const ids = misEmpresas().map((e) => e.id); return Store.get('empleos').filter((e) => ids.includes(e.empresaId)); };
 const postulacionesDe = (empleoId) => Store.get('postulaciones').filter((p) => p.empleoId === empleoId);
 
@@ -179,7 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ['nombre', 'sector', 'ubicacion', 'empleados', 'email', 'telefono', 'web', 'direccion', 'descripcion', 'color'].forEach((c) => (datos[c] = document.getElementById(`emp-${c}`).value));
     const id = document.getElementById('emp-id').value;
     if (id) Store.update('empresas', id, datos);
-    else Store.add('empresas', { ...datos, verificada: false, propia: true });
+    else {
+      const s = Sesion.get();
+      Store.add('empresas', { ...datos, verificada: false, propia: true, usuarioId: s ? s.id : null });
+    }
     bootstrap.Modal.getInstance(document.getElementById('modal-empresa')).hide();
     UI.toast(id ? 'Empresa actualizada' : 'Empresa agregada');
     pintarEmpresas();

@@ -59,11 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
   zona.addEventListener('drop', (ev) => { ev.preventDefault(); guardarCV(ev.dataTransfer.files[0]); });
 
   // ---------- Estadísticas ----------
-  const misPost = Store.get('postulaciones').filter((p) => p.usuarioId === uid || p.propia);
-  const guardados = JSON.parse(localStorage.getItem('tl_guardados') || '[]');
+  const misPost = Store.get('postulaciones').filter((p) => p.usuarioId === uid);
+  const mapaGuardados = JSON.parse(localStorage.getItem('tl_guardados_db') || '{}');
+  const guardadosIds = mapaGuardados[uid] || [];
   document.getElementById('stat-solicitudes').textContent = misPost.length;
   document.getElementById('stat-entrevistas').textContent = misPost.filter((p) => p.estado === 'Entrevista').length;
-  document.getElementById('stat-guardados').textContent = guardados.length;
+  document.getElementById('stat-guardados').textContent = guardadosIds.length;
 
   if (window.Chart) {
     const base = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true } }, scales: { x: { display: false }, y: { display: false } } };
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------- Panel de alertas ----------
   function pintarAlertas() {
-    const alertas = Store.get('alertas').filter((a) => a.usuarioId === 1 || a.usuarioId === uid);
+    const alertas = Store.get('alertas').filter((a) => a.usuarioId === uid);
     document.getElementById('lista-alertas').innerHTML = alertas.length ? alertas.map((a) => `
       <div class="d-flex align-items-center gap-3 py-2 border-bottom">
         <i class="bi bi-bell${a.activa ? '-fill text-primary' : ' text-muted'} fs-5"></i>
@@ -112,10 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('form-valoracion').addEventListener('submit', (ev) => {
     ev.preventDefault();
     const p = document.querySelector('input[name="val-puntuacion"]:checked');
+    if (!p) return UI.toast('Selecciona una calificación', 'warning');
     Store.add('resenas', {
       empresaId: Number(document.getElementById('val-empresa').value), puntuacion: Number(p.value),
       titulo: document.getElementById('val-titulo').value, comentario: document.getElementById('val-comentario').value,
-      autor: `${usuario.nombre} ${usuario.apellidos}`, fecha: new Date().toISOString(), reportada: false
+      autor: `${usuario.nombre} ${usuario.apellidos}`, usuarioId: uid, fecha: new Date().toISOString(), reportada: false
     });
     ev.target.reset();
     UI.toast('¡Gracias! Tu valoración fue publicada.');
@@ -132,7 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }).join('') : '<tr><td colspan="5" class="text-center text-muted py-4">Aún no has aplicado a ninguna oferta. <a href="empleos.html">Buscar empleos</a></td></tr>';
 
   // ---------- Empleos guardados ----------
-  const listaG = empleos.filter((e) => guardados.includes(e.id));
+  const mapaGuardados2 = JSON.parse(localStorage.getItem('tl_guardados_db') || '{}');
+  const guardadosIds2 = mapaGuardados2[uid] || JSON.parse(localStorage.getItem('tl_guardados') || '[]');
+  const listaG = empleos.filter((e) => guardadosIds2.includes(e.id));
   document.getElementById('lista-guardados').innerHTML = listaG.length
     ? listaG.map((e) => `<div class="col-md-6">${UI.jobCard(e)}</div>`).join('')
     : '<div class="col-12 text-muted small">No has guardado empleos. Usa el ícono <i class="bi bi-bookmark"></i> en cualquier vacante.</div>';

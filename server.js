@@ -134,7 +134,7 @@ const Mappers = {
   })
 };
 
-const TABLAS_MVC = new Set(['empleos', 'usuarios', 'postulaciones']);
+const TABLAS_MVC = new Set(['empleos', 'usuarios', 'postulaciones', 'guardados']);
 const TABLAS_PERMITIDAS = Object.keys(Mappers).filter((tabla) => !TABLAS_MVC.has(tabla));
 
 /* ------------------------------------------------------------
@@ -162,7 +162,7 @@ app.get('/api/estado', async (req, res) => {
    ------------------------------------------------------------ */
 app.get('/api/sync', async (req, res) => {
   try {
-    const [empresas, empleos, usuarios, postulaciones, resenas, foros, alertas, recursos, noticias] =
+    const [empresas, empleos, usuarios, postulaciones, resenas, foros, alertas, recursos, noticias, guardados] =
       await Promise.all([
         db.query('SELECT * FROM empresas ORDER BY id ASC'),
         db.query('SELECT * FROM empleos ORDER BY fecha DESC, id DESC'),
@@ -172,7 +172,8 @@ app.get('/api/sync', async (req, res) => {
         db.query('SELECT * FROM foros ORDER BY fecha DESC, id DESC'),
         db.query('SELECT * FROM alertas ORDER BY id DESC'),
         db.query('SELECT * FROM recursos ORDER BY id ASC'),
-        db.query('SELECT * FROM noticias ORDER BY fecha DESC, id ASC')
+        db.query('SELECT * FROM noticias ORDER BY fecha DESC, id ASC'),
+        db.query('SELECT usuario_id, empleo_id FROM empleos_guardados ORDER BY fecha DESC')
       ]);
 
     res.json({
@@ -186,7 +187,8 @@ app.get('/api/sync', async (req, res) => {
         foros: foros.rows.map(Mappers.foros),
         alertas: alertas.rows.map(Mappers.alertas),
         recursos: recursos.rows.map(Mappers.recursos),
-        noticias: noticias.rows.map(Mappers.noticias)
+        noticias: noticias.rows.map(Mappers.noticias),
+        guardados: guardados.rows.map((r) => ({ usuarioId: r.usuario_id, empleoId: r.empleo_id }))
       }
     });
   } catch (err) {

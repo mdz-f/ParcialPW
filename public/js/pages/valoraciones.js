@@ -83,9 +83,13 @@ function pintarDetalle() {
   document.getElementById('form-resena').addEventListener('submit', (ev) => {
     ev.preventDefault();
     const p = document.querySelector('input[name="puntuacion-val"]:checked');
+    if (!p) return UI.toast('Selecciona una calificación', 'warning');
+    const sesion = Sesion.get();
     Store.add('resenas', {
       empresaId: e.id, puntuacion: Number(p.value), titulo: document.getElementById('r-titulo').value,
-      comentario: document.getElementById('r-comentario').value, autor: document.getElementById('r-relacion').value,
+      comentario: document.getElementById('r-comentario').value,
+      autor: document.getElementById('r-relacion').value,
+      usuarioId: sesion ? sesion.id : null,
       fecha: new Date().toISOString(), reportada: false
     });
     UI.toast('¡Valoración publicada!');

@@ -253,6 +253,10 @@ const Store = {
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const json = await res.json();
       if (json.ok && json.datos) {
+        // Guardados: convertir a mapa por usuarioId para uso rápido
+        const guardados = json.datos.guardados || [];
+        delete json.datos.guardados;
+
         const huboCambios = Object.entries(json.datos).some(([tabla, filas]) => {
           const previo = localStorage.getItem(this.PREFIX + tabla);
           const nuevo = JSON.stringify(filas);
@@ -262,8 +266,20 @@ const Store = {
           }
           return false;
         });
+
+        // Sincronizar guardados: guardar mapa completo en localStorage para acceso rápido
+        const mapaGuardados = {};
+        guardados.forEach(({ usuarioId, empleoId }) => {
+          if (!mapaGuardados[usuarioId]) mapaGuardados[usuarioId] = [];
+          mapaGuardados[usuarioId].push(empleoId);
+        });
+        const guardadosStr = JSON.stringify(mapaGuardados);
+        const guardadosPrev = localStorage.getItem('tl_guardados_db');
+        const guardadosCambiaron = guardadosPrev !== guardadosStr;
+        if (guardadosCambiaron) localStorage.setItem('tl_guardados_db', guardadosStr);
+
         // Si es la primera sincronización desde Supabase en esta pestaña, refrescar vista con datos reales
-        if (huboCambios && !sessionStorage.getItem('tl_db_synced')) {
+        if ((huboCambios || guardadosCambiaron) && !sessionStorage.getItem('tl_db_synced')) {
           sessionStorage.setItem('tl_db_synced', '1');
           location.reload();
         }

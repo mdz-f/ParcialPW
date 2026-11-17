@@ -9,6 +9,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/empleos', require('./routes/empleos.routes'));
 app.use('/api/usuarios', require('./routes/usuarios.routes'));
 app.use('/api/postulaciones', require('./routes/postulaciones.routes'));
+app.use('/api/guardados', require('./routes/guardados.routes'));
 
 // Endpoint para el asistente inteligente Chambita AI
 app.post('/api/chat', (req, res) => {

@@ -174,10 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
       ev.preventDefault();
       const p = document.querySelector('input[name="puntuacion-detalle"]:checked');
       if (!p) return UI.toast('Selecciona una calificación', 'warning');
+      const esAnonima = document.getElementById('resena-anonima').checked;
       Store.add('resenas', {
         empresaId: emp.id, puntuacion: Number(p.value), titulo: document.getElementById('resena-titulo').value,
         comentario: document.getElementById('resena-comentario').value,
-        autor: document.getElementById('resena-anonima').checked ? 'Usuario anónimo' : (sesion?.nombre || 'Usuario'),
+        autor: esAnonima ? 'Usuario anónimo' : (sesion?.nombre || 'Usuario'),
+        usuarioId: esAnonima ? null : (sesion?.id || null),
         fecha: new Date().toISOString(), reportada: false
       });
       UI.toast('¡Gracias por tu valoración!');

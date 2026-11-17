@@ -114,8 +114,15 @@ const UI = {
   // Tarjeta reutilizable de empleo (inicio, resultados, similares)
   jobCard(e) {
     const emp = this.empresa(e.empresaId);
-    const guardados = JSON.parse(localStorage.getItem('tl_guardados') || '[]');
-    const guardado = guardados.includes(e.id);
+    const sesion = Sesion.get();
+    let guardado = false;
+    if (sesion) {
+      const mapa = JSON.parse(localStorage.getItem('tl_guardados_db') || '{}');
+      guardado = (mapa[sesion.id] || []).includes(e.id);
+    } else {
+      const g = JSON.parse(localStorage.getItem('tl_guardados') || '[]');
+      guardado = g.includes(e.id);
+    }
     return `
       <article class="tl-card tl-card-hover tl-job-card fade-in" onclick="location.href='empleo.html?id=${e.id}'">
         ${this.logo(emp)}
@@ -139,14 +146,40 @@ const UI = {
   },
 
   // Guardar / quitar un empleo de "guardados"
+  // Con sesión: persiste en BD (empleos_guardados). Sin sesión: solo localStorage.
   toggleGuardar(id, btn) {
-    let g = JSON.parse(localStorage.getItem('tl_guardados') || '[]');
-    const ya = g.includes(id);
-    g = ya ? g.filter((x) => x !== id) : [...g, id];
-    localStorage.setItem('tl_guardados', JSON.stringify(g));
-    btn.classList.toggle('saved', !ya);
-    btn.innerHTML = `<i class="bi ${!ya ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i>`;
-    this.toast(!ya ? 'Empleo guardado' : 'Empleo eliminado de guardados', 'info');
+    const sesion = Sesion.get();
+
+    if (sesion) {
+      // Optimista: actualizar mapa local inmediatamente
+      const mapaStr = localStorage.getItem('tl_guardados_db') || '{}';
+      const mapa = JSON.parse(mapaStr);
+      const uid = sesion.id;
+      const lista = mapa[uid] || [];
+      const ya = lista.includes(id);
+      mapa[uid] = ya ? lista.filter((x) => x !== id) : [...lista, id];
+      localStorage.setItem('tl_guardados_db', JSON.stringify(mapa));
+
+      btn.classList.toggle('saved', !ya);
+      btn.innerHTML = `<i class="bi ${!ya ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i>`;
+      this.toast(!ya ? 'Empleo guardado' : 'Empleo eliminado de guardados', 'info');
+
+      // Persistir en BD
+      fetch('/api/guardados', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId: uid, empleoId: id })
+      }).catch((err) => console.warn('Error sincronizando empleo guardado:', err.message));
+    } else {
+      // Sin sesión: solo localStorage (compatibilidad)
+      let g = JSON.parse(localStorage.getItem('tl_guardados') || '[]');
+      const ya = g.includes(id);
+      g = ya ? g.filter((x) => x !== id) : [...g, id];
+      localStorage.setItem('tl_guardados', JSON.stringify(g));
+      btn.classList.toggle('saved', !ya);
+      btn.innerHTML = `<i class="bi ${!ya ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i>`;
+      this.toast(!ya ? 'Empleo guardado' : 'Empleo eliminado de guardados', 'info');
+    }
   },
 
   // Notificación flotante (Bootstrap Toast)
