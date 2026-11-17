@@ -21,6 +21,7 @@
    ------------------------------------------------------------ */
 const Sesion = {
   get() { return JSON.parse(localStorage.getItem('tl_sesion') || 'null'); },
+  token() { return localStorage.getItem('tl_token') || ''; },
   set(usuario) {
     const sesion = {
       id: usuario.id,
@@ -41,6 +42,7 @@ const Sesion = {
     if (!res.ok || !data.ok) {
       throw new Error(data.error || 'Credenciales inválidas');
     }
+    if (data.token) localStorage.setItem('tl_token', data.token);
     return this.set(data.usuario);
   },
   async registro(payload) {
@@ -53,9 +55,14 @@ const Sesion = {
     if (!res.ok || !data.ok) {
       throw new Error(data.error || 'Error en el registro');
     }
+    if (data.token) localStorage.setItem('tl_token', data.token);
     return this.set(data.usuario);
   },
-  logout() { localStorage.removeItem('tl_sesion'); location.href = 'index.html'; }
+  logout() {
+    localStorage.removeItem('tl_sesion');
+    localStorage.removeItem('tl_token');
+    location.href = 'index.html';
+  }
 };
 
 /* ------------------------------------------------------------
@@ -237,28 +244,28 @@ function renderHeader() {
        </div>`;
 
   const secciones = [
-    ['inicio', 'index.html', 'bi-house', 'Inicio'],
-    ['empleos', 'empleos.html', 'bi-search', 'Buscar empleos'],
-    ['empresa', 'empresa.html', 'bi-megaphone', 'Publicar empleos'],
-    ['recursos', 'recursos.html', 'bi-journal-bookmark', 'Recursos'],
-    ['valoraciones', 'valoraciones.html', 'bi-star', 'Valoraciones de empresas'],
-    ['foros', 'foros.html', 'bi-chat-square-text', 'Foros'],
-    ['perfil', 'perfil.html', 'bi-person-circle', 'Mi perfil'],
-    ['admin', 'admin.html', 'bi-shield-lock', 'Admin']
+    ['inicio',       'index.html',       'bi-house',              'Inicio'],
+    ['empleos',      'empleos.html',     'bi-search',             'Buscar empleos'],
+    // 'empresa' solo visible para rol empresa o admin
+    ...(s && (s.rol === 'empresa' || s.rol === 'admin')
+      ? [['empresa', 'empresa.html', 'bi-megaphone', 'Publicar empleos']]
+      : []),
+    ['recursos',     'recursos.html',    'bi-journal-bookmark',   'Recursos'],
+    ['valoraciones', 'valoraciones.html','bi-star',               'Valoraciones de empresas'],
+    ['foros',        'foros.html',       'bi-chat-square-text',   'Foros'],
+    // 'perfil' solo si hay sesión
+    ...(s ? [['perfil', 'perfil.html', 'bi-person-circle', 'Mi perfil']] : []),
+    // 'admin' solo para administrador
+    ...(s && s.rol === 'admin'
+      ? [['admin', 'admin.html', 'bi-shield-lock', 'Admin']]
+      : [])
   ];
 
   document.getElementById('tl-header').innerHTML = `
     <header class="tl-header" data-nota="Encabezado|Logo de ChambeaSV y accesos a iniciar sesión o registrarse.">
       <div class="container d-flex align-items-center justify-content-between py-2 gap-3">
         <a href="index.html" class="navbar-brand tl-logo d-flex align-items-center gap-2 text-decoration-none" id="logo" aria-label="ChambeaSV, inicio">
-          <svg class="chambea-logo-icon" width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M 84 30 A 39 39 0 1 0 84 70 L 68.5 59.5 A 21.5 21.5 0 1 1 68.5 40.5 Z" fill="#0056FF"/>
-            <path d="M 39.5 44 C 38 53.5 43.5 62 53.5 62.5 C 61 63 66 57.5 67 51" fill="none" stroke="#00D68F" stroke-width="7.2" stroke-linecap="round"/>
-            <circle cx="53.5" cy="44.5" r="9.5" fill="#00D68F"/>
-            <rect x="50" y="42" width="2.4" height="3.8" rx="1.2" fill="#0B213F"/>
-            <rect x="54.6" y="42" width="2.4" height="3.8" rx="1.2" fill="#0B213F"/>
-          </svg>
-          <span class="fw-bold" style="color:#0B213F; font-size:1.35rem; letter-spacing:-0.03em;">Chambea<span style="color:#0056FF;">SV</span></span>
+          <img src="assets/chambeasv-logo.svg" alt="ChambeaSV" height="36" style="max-width:160px;object-fit:contain;">
         </a>
         <div class="d-flex align-items-center gap-2">${zonaUsuario}</div>
       </div>

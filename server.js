@@ -137,6 +137,9 @@ const Mappers = {
 const TABLAS_MVC = new Set(['empleos', 'usuarios', 'postulaciones', 'guardados']);
 const TABLAS_PERMITIDAS = Object.keys(Mappers).filter((tabla) => !TABLAS_MVC.has(tabla));
 
+// Auth middleware para rutas genéricas
+const { requireAuth } = require('./src/middleware/auth');
+
 /* ------------------------------------------------------------
    1. Estado del servidor y conexión a Supabase
    ------------------------------------------------------------ */
@@ -243,8 +246,8 @@ app.get('/api/:tabla/:id', async (req, res) => {
   }
 });
 
-// INSERTAR (POST /api/:tabla)
-app.post('/api/:tabla', async (req, res) => {
+// INSERTAR (POST /api/:tabla) — requiere autenticación
+app.post('/api/:tabla', requireAuth(['candidato', 'empresa', 'admin']), async (req, res) => {
   const { tabla } = req.params;
   if (!TABLAS_PERMITIDAS.includes(tabla)) {
     return res.status(404).json({ ok: false, error: 'Tabla no válida' });
@@ -339,8 +342,8 @@ app.post('/api/:tabla', async (req, res) => {
   }
 });
 
-// ACTUALIZAR (PUT /api/:tabla/:id)
-app.put('/api/:tabla/:id', async (req, res) => {
+// ACTUALIZAR (PUT /api/:tabla/:id) — requiere empresa o admin
+app.put('/api/:tabla/:id', requireAuth(['empresa', 'admin']), async (req, res) => {
   const { tabla, id } = req.params;
   const cambios = req.body || {};
   if (!TABLAS_PERMITIDAS.includes(tabla)) {
@@ -393,8 +396,8 @@ app.put('/api/:tabla/:id', async (req, res) => {
   }
 });
 
-// ELIMINAR (DELETE /api/:tabla/:id)
-app.delete('/api/:tabla/:id', async (req, res) => {
+// ELIMINAR (DELETE /api/:tabla/:id) — solo admin
+app.delete('/api/:tabla/:id', requireAuth(['admin']), async (req, res) => {
   const { tabla, id } = req.params;
   if (!TABLAS_PERMITIDAS.includes(tabla)) {
     return res.status(404).json({ ok: false, error: 'Tabla no válida' });

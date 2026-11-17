@@ -832,3 +832,65 @@ body.modo-notas [data-nota] { outline-color: #6d8eaa; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+
+/* ============================================================
+   REFINAMIENTO UI/UX — Tarjetas, hover, recursos y perfil
+   ============================================================ */
+
+/* ── Hover mejorado en tl-card-hover ─────────────────────── */
+.tl-card-hover {
+  transition: transform .22s cubic-bezier(.25,.46,.45,.94),
+              box-shadow .22s ease,
+              border-color .22s ease;
+}
+.tl-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(10, 22, 50, .12);
+  border-color: #c5d4e8;
+}
+
+/* ── Tarjetas de Recursos ─────────────────────────────────── */
+.tl-resource-thumb {
+  height: 160px;
+  border-radius: 14px 14px 0 0;
+  transition: filter .25s ease;
+  box-shadow: inset 0 -40px 60px rgba(0, 0, 0, .18);
+}
+.tl-card-hover:hover .tl-resource-thumb {
+  filter: brightness(1.08);
+}
+.tl-resource-thumb .badge {
+  font-size: .72rem;
+  backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, .85) !important;
+  color: #1a1a2e !important;
+}
+.tl-card-hover.h-100 .p-3 h3 {
+  font-size: .95rem;
+  line-height: 1.35;
+}
+
+/* ── Bloque de estadísticas del perfil ───────────────────── */
+.stat-block {
+  background: var(--tl-surface);
+  border: 1px solid var(--tl-border);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 2px 8px rgba(10, 22, 50, .06);
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.stat-block:hover {
+  box-shadow: 0 6px 20px rgba(10, 22, 50, .1);
+  transform: translateY(-2px);
+}
+.stat-block .stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--tl-primary);
+}
+.stat-block .stat-label {
+  font-size: .78rem;
+  color: var(--tl-muted);
+  margin-top: .15rem;
+}

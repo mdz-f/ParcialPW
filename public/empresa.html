@@ -9,8 +9,16 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="css/styles.css" rel="stylesheet">
+  <link rel="icon" href="assets/chambeasv-icon.svg" type="image/svg+xml">
 </head>
 <body data-page="empresa">
+  <!-- Guard de rol: solo empresa o admin pueden acceder -->
+  <script>
+    (function () {
+      const s = JSON.parse(localStorage.getItem('tl_sesion') || 'null');
+      if (!s || (s.rol !== 'empresa' && s.rol !== 'admin')) window.location.replace('index.html');
+    })();
+  </script>
   <div id="tl-header"></div>
 
   <section class="tl-page-header">

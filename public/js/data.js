@@ -202,10 +202,14 @@ const Store = {
     datos.unshift(registroLocal);
     this.set(tabla, datos);
 
-    // Persistencia asíncrona en Supabase PostgreSQL
+    // Persistencia asíncrona en Supabase PostgreSQL (con token JWT)
+    const token = localStorage.getItem('tl_token') || '';
     fetch(`/api/${tabla}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
       body: JSON.stringify(registro)
     })
       .then((r) => {
@@ -226,10 +230,14 @@ const Store = {
     const datos = this.get(tabla).map((r) => (r.id === Number(id) ? { ...r, ...cambios } : r));
     this.set(tabla, datos);
 
-    // Actualización asíncrona en Supabase PostgreSQL
+    // Actualización asíncrona en Supabase PostgreSQL (con token JWT)
+    const token = localStorage.getItem('tl_token') || '';
     fetch(`/api/${tabla}/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
       body: JSON.stringify(cambios)
     })
       .then((r) => {
@@ -240,8 +248,12 @@ const Store = {
   remove(tabla, id) {
     this.set(tabla, this.get(tabla).filter((r) => r.id !== Number(id)));
 
-    // Eliminación asíncrona en Supabase PostgreSQL
-    fetch(`/api/${tabla}/${id}`, { method: 'DELETE' })
+    // Eliminación asíncrona en Supabase PostgreSQL (con token JWT)
+    const token = localStorage.getItem('tl_token') || '';
+    fetch(`/api/${tabla}/${id}`, {
+      method: 'DELETE',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
       })

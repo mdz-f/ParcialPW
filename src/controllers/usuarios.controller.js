@@ -1,4 +1,5 @@
 const Usuarios = require('../models/usuarios.model');
+const { sign } = require('../middleware/auth');
 
 const CAMPOS_ACTUALIZABLES = [
   'nombre', 'apellidos', 'email', 'telefono', 'rol', 'titular',
@@ -70,6 +71,7 @@ async function login(req, res) {
   res.json({
     ok: true,
     mensaje: `¡Bienvenido(a), ${usuario.nombre}!`,
+    token: sign({ id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol }),
     usuario: mapear(usuario)
   });
 }
@@ -126,6 +128,7 @@ async function registro(req, res) {
   res.status(201).json({
     ok: true,
     mensaje: '¡Registro completado exitosamente!',
+    token: sign({ id: nuevoUsuario.id, nombre: nuevoUsuario.nombre, email: nuevoUsuario.email, rol: nuevoUsuario.rol }),
     usuario: mapear(nuevoUsuario)
   });
 }
