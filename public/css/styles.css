@@ -231,12 +231,20 @@ a { text-decoration: none; }
 .tl-thread-stats { text-align: center; min-width: 64px; color: var(--tl-muted); font-size: .78rem; }
 .tl-thread-stats b { display: block; font-size: 1.1rem; color: var(--tl-text); }
 
-/* Recursos */
+/* Recursos — tarjetas con imagen fotográfica + overlay */
 .tl-resource-thumb {
-  height: 140px; border-radius: var(--tl-radius) var(--tl-radius) 0 0;
-  display: grid; place-items: center; color: #fff; font-size: 2.6rem; position: relative;
+  height: 160px; border-radius: var(--tl-radius) var(--tl-radius) 0 0;
+  display: flex; align-items: flex-end; padding: .75rem;
+  color: #fff; position: relative; overflow: hidden;
+  background-size: cover; background-position: center;
+  transition: filter .25s ease;
 }
-.tl-resource-thumb .badge { position: absolute; top: .75rem; left: .75rem; }
+.tl-resource-thumb .badge {
+  position: relative; z-index: 1;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  background: rgba(255,255,255,.88) !important; color: #1a1a2e !important;
+  font-size: .72rem; font-weight: 600;
+}
 
 /* ---------- 5. Panel administrativo ---------- */
 .tl-admin { display: flex; min-height: 100vh; }
@@ -748,9 +756,11 @@ a:hover { color: var(--tl-primary-dark); }
 .tl-page-header p { color: #657587; opacity: 1; }
 .page-kicker { padding: 0; border: 0; background: transparent; color: #6a7785; }
 .search-heading { margin-bottom: 1.25rem; }
-.search-heading .page-kicker { margin-bottom: .5rem; color: #7a5a45; }
-.search-heading h1 { color: #263648; font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 500; letter-spacing: -.045em; }
-.search-heading p { max-width: 600px; color: #667789; }
+body:not(.page-search) .search-heading .page-kicker { margin-bottom: .5rem; color: #7a5a45; }
+body:not(.page-search) .search-heading h1 { color: #263648; font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 500; letter-spacing: -.045em; }
+body:not(.page-search) .search-heading p { max-width: 600px; color: #667789; }
+/* Search page: ensure white text on blue gradient */.page-search .search-heading h1 { color: #fff; }
+.page-search .search-heading p { color: rgba(255,255,255,.78); }
 .page-search .tl-search-box { padding: .7rem !important; border: 1px solid #d7d6d2; border-radius: 10px; box-shadow: 0 3px 12px rgba(28,48,69,.06); }
 .page-search .tl-search-box .form-control,
 .page-search .tl-search-box .form-select,
@@ -850,21 +860,9 @@ body.modo-notas [data-nota] { outline-color: #6d8eaa; }
   border-color: #c5d4e8;
 }
 
-/* ── Tarjetas de Recursos ─────────────────────────────────── */
-.tl-resource-thumb {
-  height: 160px;
-  border-radius: 14px 14px 0 0;
-  transition: filter .25s ease;
-  box-shadow: inset 0 -40px 60px rgba(0, 0, 0, .18);
-}
+/* ── Tarjetas de Recursos (refuerzo hover) ───────────────── */
 .tl-card-hover:hover .tl-resource-thumb {
-  filter: brightness(1.08);
-}
-.tl-resource-thumb .badge {
-  font-size: .72rem;
-  backdrop-filter: blur(4px);
-  background: rgba(255, 255, 255, .85) !important;
-  color: #1a1a2e !important;
+  filter: brightness(1.1) saturate(1.05);
 }
 .tl-card-hover.h-100 .p-3 h3 {
   font-size: .95rem;
