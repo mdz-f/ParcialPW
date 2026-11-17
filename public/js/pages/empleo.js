@@ -5,7 +5,8 @@
  * - Tarjeta de contacto de la empresa + botón "Aplicar"
  * - Sección de comentarios y valoraciones de la empresa
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await Store.ready;
   const empleo = Store.find('empleos', UI.param('id') || 1);
   const cont = document.getElementById('detalle');
 
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('ap-telefono').value = usuarioActual?.telefono || '';
 
-  document.getElementById('form-aplicar').addEventListener('submit', (ev) => {
+  document.getElementById('form-aplicar').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const archivoCV = document.getElementById('ap-cv').files[0];
     if (archivoCV && !/\.(pdf|docx?)$/i.test(archivoCV.name)) {
@@ -123,25 +124,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const partesNombre = document.getElementById('ap-nombre').value.trim().split(/\s+/);
     const usuarioId = sesion?.id || 1;
-    Store.update('usuarios', usuarioId, {
-      nombre: partesNombre[0],
-      apellidos: partesNombre.slice(1).join(' '),
-      email: document.getElementById('ap-email').value.trim(),
-      telefono: document.getElementById('ap-telefono').value.trim(),
-      ...(archivoCV ? { cv: archivoCV.name } : {})
-    });
-    Store.add('postulaciones', {
-      empleoId: empleo.id,
-      usuarioId,
-      fecha: new Date().toISOString(),
-      estado: 'Recibida',
-      carta: document.getElementById('ap-carta').value,
-      cvAdjunto: archivoCV?.name || usuarioActual?.cv || '',
-      propia: true
-    });
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-aplicar')).hide();
-    UI.toast('¡Postulación enviada! Puedes darle seguimiento en "Mi perfil".');
-    pintarBotonAplicar();
+    try {
+      // Subir CV real si se adjuntó
+      let cvUrl = usuarioActual?.cv || '';
+      if (archivoCV) {
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(archivoCV);
+        });
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          headers: Store._headers(),
+          body: JSON.stringify({ nombre: archivoCV.name, base64 })
+        });
+        if (!uploadRes.ok) {
+          const d = await uploadRes.json().catch(() => ({}));
+          throw new Error(d.error || 'Error al subir el CV');
+        }
+        const uploadData = await uploadRes.json();
+        cvUrl = uploadData.url;
+      }
+
+      await Store.update('usuarios', usuarioId, {
+        nombre: partesNombre[0],
+        apellidos: partesNombre.slice(1).join(' '),
+        email: document.getElementById('ap-email').value.trim(),
+        telefono: document.getElementById('ap-telefono').value.trim(),
+        ...(cvUrl ? { cv: cvUrl } : {})
+      });
+      await Store.add('postulaciones', {
+        empleoId: empleo.id,
+        usuarioId,
+        fecha: new Date().toISOString(),
+        estado: 'Recibida',
+        carta: document.getElementById('ap-carta').value,
+        cvAdjunto: cvUrl,
+        propia: true
+      });
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-aplicar')).hide();
+      UI.toast('¡Postulación enviada! Puedes darle seguimiento en "Mi perfil".');
+      pintarBotonAplicar();
+    } catch (err) {
+      console.error('Error al postular:', err.message);
+    }
   });
 
   // ---------- Reseñas de la empresa ----------
@@ -170,20 +197,24 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </form>`;
 
-    document.getElementById('form-resena').addEventListener('submit', (ev) => {
+    document.getElementById('form-resena').addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const p = document.querySelector('input[name="puntuacion-detalle"]:checked');
       if (!p) return UI.toast('Selecciona una calificación', 'warning');
       const esAnonima = document.getElementById('resena-anonima').checked;
-      Store.add('resenas', {
-        empresaId: emp.id, puntuacion: Number(p.value), titulo: document.getElementById('resena-titulo').value,
-        comentario: document.getElementById('resena-comentario').value,
-        autor: esAnonima ? 'Usuario anónimo' : (sesion?.nombre || 'Usuario'),
-        usuarioId: esAnonima ? null : (sesion?.id || null),
-        fecha: new Date().toISOString(), reportada: false
-      });
-      UI.toast('¡Gracias por tu valoración!');
-      pintarResenas();
+      try {
+        await Store.add('resenas', {
+          empresaId: emp.id, puntuacion: Number(p.value), titulo: document.getElementById('resena-titulo').value,
+          comentario: document.getElementById('resena-comentario').value,
+          autor: esAnonima ? 'Usuario anónimo' : (sesion?.nombre || 'Usuario'),
+          usuarioId: esAnonima ? null : (sesion?.id || null),
+          fecha: new Date().toISOString(), reportada: false
+        });
+        UI.toast('¡Gracias por tu valoración!');
+        pintarResenas();
+      } catch (err) {
+        console.error('Error al publicar reseña:', err.message);
+      }
     });
   }
   pintarResenas();

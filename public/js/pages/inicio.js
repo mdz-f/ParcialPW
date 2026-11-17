@@ -3,7 +3,8 @@
  * - Calcula y anima las métricas del portal
  * - Muestra sectores, empleos recientes, empresas top y noticias
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await Store.ready;
   const empleos = Store.get('empleos').filter((e) => e.estado === 'Activa');
   const empresas = Store.get('empresas');
 

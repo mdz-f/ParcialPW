@@ -159,7 +159,8 @@
   <script src="js/data.js"></script>
   <script src="js/layout.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await Store.ready;
       // Navegación del sidebar
       function irASeccion(sec) {
         document.querySelectorAll('.tl-admin-section').forEach((s) => s.classList.toggle('active', s.id === `sec-${sec}`));
@@ -253,19 +254,23 @@
         `).join('');
       }
 
-      window.toggleEstadoUsuario = (id) => {
+      window.toggleEstadoUsuario = async (id) => {
         const u = Store.find('usuarios', id);
-        Store.update('usuarios', id, { estado: u.estado === 'Activo' ? 'Suspendido' : 'Activo' });
-        UI.toast('Estado de usuario modificado');
-        renderUsuarios();
+        try {
+          await Store.update('usuarios', id, { estado: u.estado === 'Activo' ? 'Suspendido' : 'Activo' });
+          UI.toast('Estado de usuario modificado');
+          renderUsuarios();
+        } catch (err) { console.error('Error al modificar usuario:', err.message); }
       };
 
-      window.eliminarUsuario = (id) => {
+      window.eliminarUsuario = async (id) => {
         if (!confirm('¿Deseas eliminar este usuario?')) return;
-        Store.remove('usuarios', id);
-        UI.toast('Usuario eliminado', 'danger');
-        renderUsuarios();
-        renderPrincipal();
+        try {
+          await Store.remove('usuarios', id);
+          UI.toast('Usuario eliminado', 'danger');
+          renderUsuarios();
+          renderPrincipal();
+        } catch (err) { console.error('Error al eliminar usuario:', err.message); }
       };
 
       document.getElementById('buscar-usuarios').addEventListener('input', renderUsuarios);
@@ -297,18 +302,22 @@
         `).join('');
       }
 
-      window.toggleVerificada = (id, verif) => {
-        Store.update('empresas', id, { verificada: verif });
-        UI.toast(verif ? 'Empresa verificada' : 'Verificación retirada');
-        renderEmpresas();
+      window.toggleVerificada = async (id, verif) => {
+        try {
+          await Store.update('empresas', id, { verificada: verif });
+          UI.toast(verif ? 'Empresa verificada' : 'Verificación retirada');
+          renderEmpresas();
+        } catch (err) { console.error('Error al verificar empresa:', err.message); }
       };
 
-      window.eliminarEmpresaAdmin = (id) => {
+      window.eliminarEmpresaAdmin = async (id) => {
         if (!confirm('¿Eliminar esta empresa del portal?')) return;
-        Store.remove('empresas', id);
-        UI.toast('Empresa eliminada', 'info');
-        renderEmpresas();
-        renderPrincipal();
+        try {
+          await Store.remove('empresas', id);
+          UI.toast('Empresa eliminada', 'info');
+          renderEmpresas();
+          renderPrincipal();
+        } catch (err) { console.error('Error al eliminar empresa:', err.message); }
       };
 
       document.getElementById('buscar-empresas-admin').addEventListener('input', renderEmpresas);
@@ -333,19 +342,23 @@
         `).join('');
       }
 
-      window.toggleEstadoVacante = (id) => {
+      window.toggleEstadoVacante = async (id) => {
         const v = Store.find('empleos', id);
-        Store.update('empleos', id, { estado: v.estado === 'Activa' ? 'Pausada' : 'Activa' });
-        UI.toast('Estado de vacante actualizado');
-        renderVacantes();
+        try {
+          await Store.update('empleos', id, { estado: v.estado === 'Activa' ? 'Pausada' : 'Activa' });
+          UI.toast('Estado de vacante actualizado');
+          renderVacantes();
+        } catch (err) { console.error('Error al cambiar estado vacante:', err.message); }
       };
 
-      window.eliminarVacanteAdmin = (id) => {
+      window.eliminarVacanteAdmin = async (id) => {
         if (!confirm('¿Eliminar esta vacante?')) return;
-        Store.remove('empleos', id);
-        UI.toast('Vacante eliminada');
-        renderVacantes();
-        renderPrincipal();
+        try {
+          await Store.remove('empleos', id);
+          UI.toast('Vacante eliminada');
+          renderVacantes();
+          renderPrincipal();
+        } catch (err) { console.error('Error al eliminar vacante:', err.message); }
       };
 
       document.getElementById('buscar-vacantes-admin').addEventListener('input', renderVacantes);
@@ -388,10 +401,10 @@
         document.getElementById('lista-reportes').innerHTML = (htmlRes || htmlForo) ? (htmlRes + htmlForo) : '<div class="tl-empty"><i class="bi bi-check-circle text-success fs-1"></i><p>Todo limpio. No hay contenido reportado.</p></div>';
       }
 
-      window.aprobarResena = (id) => { Store.update('resenas', id, { reportada: false }); UI.toast('Reseña aprobada'); renderModeracion(); renderPrincipal(); };
-      window.borrarResena = (id) => { Store.remove('resenas', id); UI.toast('Reseña eliminada permanentemente', 'danger'); renderModeracion(); renderPrincipal(); };
-      window.aprobarForo = (id) => { Store.update('foros', id, { reportado: false }); UI.toast('Tema de debate aprobado'); renderModeracion(); renderPrincipal(); };
-      window.borrarForo = (id) => { Store.remove('foros', id); UI.toast('Tema de debate eliminado', 'danger'); renderModeracion(); renderPrincipal(); };
+      window.aprobarResena = async (id) => { try { await Store.update('resenas', id, { reportada: false }); UI.toast('Reseña aprobada'); renderModeracion(); renderPrincipal(); } catch (e) { console.error(e.message); } };
+      window.borrarResena = async (id) => { try { await Store.remove('resenas', id); UI.toast('Reseña eliminada permanentemente', 'danger'); renderModeracion(); renderPrincipal(); } catch (e) { console.error(e.message); } };
+      window.aprobarForo = async (id) => { try { await Store.update('foros', id, { reportado: false }); UI.toast('Tema de debate aprobado'); renderModeracion(); renderPrincipal(); } catch (e) { console.error(e.message); } };
+      window.borrarForo = async (id) => { try { await Store.remove('foros', id); UI.toast('Tema de debate eliminado', 'danger'); renderModeracion(); renderPrincipal(); } catch (e) { console.error(e.message); } };
 
       // 6. Gráficas estadísticas
       let chart1 = null;

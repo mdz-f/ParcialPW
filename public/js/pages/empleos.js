@@ -6,7 +6,8 @@
  *  3. Cada vez que cambia un filtro se ejecuta filtrar() y se repinta la lista
  *  (En la versión con backend esto será: GET /api/empleos?q=...&nivel=...)
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await Store.ready;
   const empleos = Store.get('empleos').filter((e) => e.estado === 'Activa');
 
   // Opciones de cada grupo de filtros
@@ -92,10 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Guardar la búsqueda actual como alerta de empleo
-  document.getElementById('btn-guardar-alerta').addEventListener('click', () => {
+  document.getElementById('btn-guardar-alerta').addEventListener('click', async () => {
     const termino = document.getElementById('f-q').value || 'Todos los empleos';
-    Store.add('alertas', { usuarioId: 1, termino, ubicacion: document.getElementById('f-ubicacion').value || 'Cualquiera', frecuencia: 'Diaria', canal: 'Correo', activa: true });
-    UI.toast(`Alerta creada: "${termino}". Recibirás notificaciones por correo.`);
+    try {
+      await Store.add('alertas', { usuarioId: 1, termino, ubicacion: document.getElementById('f-ubicacion').value || 'Cualquiera', frecuencia: 'Diaria', canal: 'Correo', activa: true });
+      UI.toast(`Alerta creada: "${termino}". Recibirás notificaciones por correo.`);
+    } catch (err) { console.error('Error al crear alerta:', err.message); }
   });
 
   filtrar();

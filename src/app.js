@@ -3,13 +3,14 @@ const path = require('path');
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/api/empleos', require('./routes/empleos.routes'));
 app.use('/api/usuarios', require('./routes/usuarios.routes'));
 app.use('/api/postulaciones', require('./routes/postulaciones.routes'));
 app.use('/api/guardados', require('./routes/guardados.routes'));
+app.use('/api/upload', require('./routes/upload.routes'));
 
 // Endpoint para el asistente inteligente Chambita AI
 app.post('/api/chat', (req, res) => {

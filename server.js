@@ -342,8 +342,8 @@ app.post('/api/:tabla', requireAuth(['candidato', 'empresa', 'admin']), async (r
   }
 });
 
-// ACTUALIZAR (PUT /api/:tabla/:id) — requiere empresa o admin
-app.put('/api/:tabla/:id', requireAuth(['empresa', 'admin']), async (req, res) => {
+// ACTUALIZAR (PUT /api/:tabla/:id) — requiere autenticación
+app.put('/api/:tabla/:id', requireAuth(['candidato', 'empresa', 'admin']), async (req, res) => {
   const { tabla, id } = req.params;
   const cambios = req.body || {};
   if (!TABLAS_PERMITIDAS.includes(tabla)) {
@@ -396,8 +396,8 @@ app.put('/api/:tabla/:id', requireAuth(['empresa', 'admin']), async (req, res) =
   }
 });
 
-// ELIMINAR (DELETE /api/:tabla/:id) — solo admin
-app.delete('/api/:tabla/:id', requireAuth(['admin']), async (req, res) => {
+// ELIMINAR (DELETE /api/:tabla/:id) — requiere autenticación
+app.delete('/api/:tabla/:id', requireAuth(['candidato', 'empresa', 'admin']), async (req, res) => {
   const { tabla, id } = req.params;
   if (!TABLAS_PERMITIDAS.includes(tabla)) {
     return res.status(404).json({ ok: false, error: 'Tabla no válida' });

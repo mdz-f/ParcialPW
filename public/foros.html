@@ -117,7 +117,8 @@
   <script src="js/data.js"></script>
   <script src="js/layout.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await Store.ready;
       let categoriaActual = '';
 
       function pintarForos() {
@@ -147,11 +148,11 @@
         `).join('') : '<div class="tl-empty"><i class="bi bi-chat-square"></i>No hay temas en esta categoría. ¡Sé el primero en publicar!</div>';
       }
 
-      window.verHilo = (id) => {
+      window.verHilo = async (id) => {
         const f = Store.find('foros', id);
         if (!f) return;
         // Incrementar vistas
-        Store.update('foros', id, { vistas: (f.vistas || 0) + 1 });
+        try { await Store.update('foros', id, { vistas: (f.vistas || 0) + 1 }); } catch (e) { /* no bloquear UI */ }
 
         const sesion = Sesion.get();
         document.getElementById('contenido-hilo').innerHTML = `
@@ -191,15 +192,17 @@
           </div>
         `;
 
-        document.getElementById('form-responder').addEventListener('submit', (ev) => {
+        document.getElementById('form-responder').addEventListener('submit', async (ev) => {
           ev.preventDefault();
           const texto = document.getElementById('resp-texto').value;
           const autor = sesion ? sesion.nombre : 'Usuario Anónimo';
           const nuevasResp = [...(f.respuestas || []), { autor, texto, fecha: new Date().toISOString() }];
-          Store.update('foros', id, { respuestas: nuevasResp });
-          UI.toast('¡Respuesta publicada!');
-          verHilo(id);
-          pintarForos();
+          try {
+            await Store.update('foros', id, { respuestas: nuevasResp });
+            UI.toast('¡Respuesta publicada!');
+            verHilo(id);
+            pintarForos();
+          } catch (err) { console.error('Error al responder:', err.message); }
         });
 
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-ver-hilo')).show();
@@ -217,25 +220,27 @@
       });
 
       // Crear nuevo debate
-      document.getElementById('form-nuevo-tema').addEventListener('submit', (ev) => {
+      document.getElementById('form-nuevo-tema').addEventListener('submit', async (ev) => {
         ev.preventDefault();
         const sesion = Sesion.get();
-        Store.add('foros', {
-          titulo: document.getElementById('tema-titulo').value,
-          categoria: document.getElementById('tema-categoria').value,
-          etiqueta: document.getElementById('tema-etiqueta').value,
-          contenido: document.getElementById('tema-contenido').value,
-          autor: sesion ? sesion.nombre : 'Usuario',
-          usuarioId: sesion ? sesion.id : null,
-          fecha: new Date().toISOString(),
-          vistas: 1,
-          reportado: false,
-          respuestas: []
-        });
-        bootstrap.Modal.getInstance(document.getElementById('modal-nuevo-tema')).hide();
-        ev.target.reset();
-        UI.toast('¡Debate creado con éxito!');
-        pintarForos();
+        try {
+          await Store.add('foros', {
+            titulo: document.getElementById('tema-titulo').value,
+            categoria: document.getElementById('tema-categoria').value,
+            etiqueta: document.getElementById('tema-etiqueta').value,
+            contenido: document.getElementById('tema-contenido').value,
+            autor: sesion ? sesion.nombre : 'Usuario',
+            usuarioId: sesion ? sesion.id : null,
+            fecha: new Date().toISOString(),
+            vistas: 1,
+            reportado: false,
+            respuestas: []
+          });
+          bootstrap.Modal.getInstance(document.getElementById('modal-nuevo-tema')).hide();
+          ev.target.reset();
+          UI.toast('¡Debate creado con éxito!');
+          pintarForos();
+        } catch (err) { console.error('Error al crear debate:', err.message); }
       });
 
       pintarForos();

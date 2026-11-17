@@ -100,6 +100,8 @@ const AuthModule = {
       rol: usuario.rol
     };
 
+    // Guardar token JWT y datos de sesión
+    if (data.token) localStorage.setItem('tl_token', data.token);
     localStorage.setItem('tl_sesion', JSON.stringify(sesion));
     return sesion;
   },
@@ -128,6 +130,8 @@ const AuthModule = {
       rol: usuario.rol
     };
 
+    // Guardar token JWT y datos de sesión
+    if (data.token) localStorage.setItem('tl_token', data.token);
     localStorage.setItem('tl_sesion', JSON.stringify(sesion));
     return sesion;
   },

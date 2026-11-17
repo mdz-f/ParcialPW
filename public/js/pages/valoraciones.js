@@ -80,31 +80,36 @@ function pintarDetalle() {
       <div class="text-end"><button class="btn btn-primary" id="btn-publicar-resena">Publicar valoración</button></div>
     </form>`;
 
-  document.getElementById('form-resena').addEventListener('submit', (ev) => {
+  document.getElementById('form-resena').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const p = document.querySelector('input[name="puntuacion-val"]:checked');
     if (!p) return UI.toast('Selecciona una calificación', 'warning');
     const sesion = Sesion.get();
-    Store.add('resenas', {
-      empresaId: e.id, puntuacion: Number(p.value), titulo: document.getElementById('r-titulo').value,
-      comentario: document.getElementById('r-comentario').value,
-      autor: document.getElementById('r-relacion').value,
-      usuarioId: sesion ? sesion.id : null,
-      fecha: new Date().toISOString(), reportada: false
-    });
-    UI.toast('¡Valoración publicada!');
-    pintarLista(); pintarDetalle();
+    try {
+      await Store.add('resenas', {
+        empresaId: e.id, puntuacion: Number(p.value), titulo: document.getElementById('r-titulo').value,
+        comentario: document.getElementById('r-comentario').value,
+        autor: document.getElementById('r-relacion').value,
+        usuarioId: sesion ? sesion.id : null,
+        fecha: new Date().toISOString(), reportada: false
+      });
+      UI.toast('¡Valoración publicada!');
+      pintarLista(); pintarDetalle();
+    } catch (err) { console.error('Error al publicar valoración:', err.message); }
   });
   if (document.body.classList.contains('modo-notas')) Notas.pintar();
 }
 
-function reportar(id) {
-  Store.update('resenas', id, { reportada: true });
-  UI.toast('Reseña reportada. El equipo de moderación la revisará.', 'warning');
-  pintarDetalle();
+async function reportar(id) {
+  try {
+    await Store.update('resenas', id, { reportada: true });
+    UI.toast('Reseña reportada. El equipo de moderación la revisará.', 'warning');
+    pintarDetalle();
+  } catch (err) { console.error('Error al reportar:', err.message); }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await Store.ready;
   const sectores = [...new Set(Store.get('empresas').map((e) => e.sector))];
   document.getElementById('filtro-sector').innerHTML += sectores.map((s) => `<option>${s}</option>`).join('');
   ['buscar-empresa', 'filtro-sector', 'orden-empresas'].forEach((id) => document.getElementById(id).addEventListener('input', pintarLista));

@@ -7,7 +7,8 @@
  * - Mis solicitudes y empleos guardados
  * Para la demo, si no hay sesión se muestra el usuario id 1 (María López).
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await Store.ready;
   const sesion = Sesion.get();
   const usuarios = Store.get('usuarios');
   const usuario = usuarios.find((u) => u.email === sesion?.email) || usuarios[0];
@@ -32,26 +33,49 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('p-habilidades').value = (usuario.habilidades || []).join(', ');
   if (usuario.cv) document.getElementById('cv-nombre').innerHTML = `<i class="bi bi-file-earmark-check text-success"></i> ${usuario.cv}`;
 
-  document.getElementById('form-perfil').addEventListener('submit', (ev) => {
+  document.getElementById('form-perfil').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const cambios = {};
     campos.forEach((c) => (cambios[c] = document.getElementById(`p-${c}`).value));
     cambios.habilidades = document.getElementById('p-habilidades').value.split(',').map((x) => x.trim()).filter(Boolean);
-    Store.update('usuarios', uid, cambios); // UPDATE usuarios SET ... WHERE id = uid
-    UI.toast('Perfil actualizado correctamente');
-    pintarCabecera();
+    try {
+      await Store.update('usuarios', uid, cambios);
+      UI.toast('Perfil actualizado correctamente');
+      pintarCabecera();
+    } catch (err) { console.error('Error al guardar perfil:', err.message); }
   });
 
-  // Carga de CV (se guarda solo el nombre del archivo en el prototipo)
+  // Carga de CV (subida real al servidor)
   const inputCV = document.getElementById('p-cv');
   const zona = document.getElementById('dropzone-cv');
-  const guardarCV = (archivo) => {
+  const guardarCV = async (archivo) => {
     if (!archivo) return;
     if (!/\.(pdf|docx?)$/i.test(archivo.name)) return UI.toast('Solo se permiten archivos PDF o DOCX', 'warning');
-    Store.update('usuarios', uid, { cv: archivo.name });
-    document.getElementById('cv-nombre').innerHTML = `<i class="bi bi-file-earmark-check text-success"></i> ${archivo.name}`;
-    UI.toast('Currículum cargado');
-    pintarCabecera();
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(archivo);
+      });
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        headers: Store._headers(),
+        body: JSON.stringify({ nombre: archivo.name, base64 })
+      });
+      if (!uploadRes.ok) {
+        const d = await uploadRes.json().catch(() => ({}));
+        throw new Error(d.error || 'Error al subir el CV');
+      }
+      const uploadData = await uploadRes.json();
+      await Store.update('usuarios', uid, { cv: uploadData.url });
+      document.getElementById('cv-nombre').innerHTML = `<i class="bi bi-file-earmark-check text-success"></i> <a href="${uploadData.url}" target="_blank">${archivo.name}</a>`;
+      UI.toast('Currículum cargado');
+      pintarCabecera();
+    } catch (err) {
+      console.error('Error al subir CV:', err.message);
+      UI.toast('Error al subir el CV', 'danger');
+    }
   };
   inputCV.addEventListener('change', () => guardarCV(inputCV.files[0]));
   ['dragover', 'dragenter'].forEach((e) => zona.addEventListener(e, (ev) => { ev.preventDefault(); zona.classList.add('drag'); }));
@@ -60,8 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------- Estadísticas ----------
   const misPost = Store.get('postulaciones').filter((p) => p.usuarioId === uid);
-  const mapaGuardados = JSON.parse(localStorage.getItem('tl_guardados_db') || '{}');
-  const guardadosIds = mapaGuardados[uid] || [];
+  const guardadosIds = Store._guardados[uid] || [];
   document.getElementById('stat-solicitudes').textContent = misPost.length;
   document.getElementById('stat-entrevistas').textContent = misPost.filter((p) => p.estado === 'Entrevista').length;
   document.getElementById('stat-guardados').textContent = guardadosIds.length;
@@ -93,34 +116,38 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="btn btn-sm btn-light text-danger" onclick="eliminarAlerta(${a.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
       </div>`).join('') : '<p class="text-muted small mb-0">No tienes alertas configuradas.</p>';
   }
-  window.toggleAlerta = (id, activa) => { Store.update('alertas', id, { activa }); UI.toast(activa ? 'Alerta activada' : 'Alerta desactivada', 'info'); pintarAlertas(); };
-  window.eliminarAlerta = (id) => { Store.remove('alertas', id); pintarAlertas(); };
-  document.getElementById('form-alerta').addEventListener('submit', (ev) => {
+  window.toggleAlerta = async (id, activa) => { try { await Store.update('alertas', id, { activa }); UI.toast(activa ? 'Alerta activada' : 'Alerta desactivada', 'info'); pintarAlertas(); } catch (e) { console.error(e.message); } };
+  window.eliminarAlerta = async (id) => { try { await Store.remove('alertas', id); pintarAlertas(); } catch (e) { console.error(e.message); } };
+  document.getElementById('form-alerta').addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    Store.add('alertas', {
-      usuarioId: uid, termino: document.getElementById('al-termino').value, ubicacion: document.getElementById('al-ubicacion').value || 'Cualquiera',
-      frecuencia: document.getElementById('al-frecuencia').value, canal: document.getElementById('al-canal').value, activa: true
-    });
-    ev.target.reset();
-    UI.toast('Alerta creada. Te avisaremos cuando haya vacantes nuevas.');
-    pintarAlertas();
+    try {
+      await Store.add('alertas', {
+        usuarioId: uid, termino: document.getElementById('al-termino').value, ubicacion: document.getElementById('al-ubicacion').value || 'Cualquiera',
+        frecuencia: document.getElementById('al-frecuencia').value, canal: document.getElementById('al-canal').value, activa: true
+      });
+      ev.target.reset();
+      UI.toast('Alerta creada. Te avisaremos cuando haya vacantes nuevas.');
+      pintarAlertas();
+    } catch (err) { console.error('Error al crear alerta:', err.message); }
   });
 
   // ---------- Valoraciones ----------
   document.getElementById('val-empresa').innerHTML = '<option value="">Selecciona la empresa donde trabajaste</option>' +
     Store.get('empresas').map((e) => `<option value="${e.id}">${e.nombre}</option>`).join('');
   document.getElementById('val-estrellas').innerHTML = UI.starInput('val-puntuacion');
-  document.getElementById('form-valoracion').addEventListener('submit', (ev) => {
+  document.getElementById('form-valoracion').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const p = document.querySelector('input[name="val-puntuacion"]:checked');
     if (!p) return UI.toast('Selecciona una calificación', 'warning');
-    Store.add('resenas', {
-      empresaId: Number(document.getElementById('val-empresa').value), puntuacion: Number(p.value),
-      titulo: document.getElementById('val-titulo').value, comentario: document.getElementById('val-comentario').value,
-      autor: `${usuario.nombre} ${usuario.apellidos}`, usuarioId: uid, fecha: new Date().toISOString(), reportada: false
-    });
-    ev.target.reset();
-    UI.toast('¡Gracias! Tu valoración fue publicada.');
+    try {
+      await Store.add('resenas', {
+        empresaId: Number(document.getElementById('val-empresa').value), puntuacion: Number(p.value),
+        titulo: document.getElementById('val-titulo').value, comentario: document.getElementById('val-comentario').value,
+        autor: `${usuario.nombre} ${usuario.apellidos}`, usuarioId: uid, fecha: new Date().toISOString(), reportada: false
+      });
+      ev.target.reset();
+      UI.toast('¡Gracias! Tu valoración fue publicada.');
+    } catch (err) { console.error('Error al publicar valoración:', err.message); }
   });
 
   // ---------- Mis solicitudes ----------
@@ -134,8 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }).join('') : '<tr><td colspan="5" class="text-center text-muted py-4">Aún no has aplicado a ninguna oferta. <a href="empleos.html">Buscar empleos</a></td></tr>';
 
   // ---------- Empleos guardados ----------
-  const mapaGuardados2 = JSON.parse(localStorage.getItem('tl_guardados_db') || '{}');
-  const guardadosIds2 = mapaGuardados2[uid] || JSON.parse(localStorage.getItem('tl_guardados') || '[]');
+  const guardadosIds2 = Store._guardados[uid] || [];
   const listaG = empleos.filter((e) => guardadosIds2.includes(e.id));
   document.getElementById('lista-guardados').innerHTML = listaG.length
     ? listaG.map((e) => `<div class="col-md-6">${UI.jobCard(e)}</div>`).join('')

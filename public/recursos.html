@@ -84,7 +84,8 @@
      * RECURSOS: filtra las tarjetas por categoría/tipo, abre el recurso
      * en un modal, muestra noticias y un checklist de CV que se guarda.
      */
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await Store.ready;
       const recursos = Store.get('recursos');
       let categoria = '';
 

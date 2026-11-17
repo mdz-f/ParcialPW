@@ -84,12 +84,14 @@ function abrirEmpresa(id) {
   bootstrap.Modal.getOrCreateInstance(document.getElementById('modal-empresa')).show();
 }
 
-function eliminarEmpresa(id) {
+async function eliminarEmpresa(id) {
   if (id === 1) return UI.toast('La empresa principal de la demo no se puede eliminar', 'warning');
   if (!confirm('¿Eliminar esta empresa?')) return;
-  Store.remove('empresas', id);
-  UI.toast('Empresa eliminada', 'info');
-  pintarEmpresas();
+  try {
+    await Store.remove('empresas', id);
+    UI.toast('Empresa eliminada', 'info');
+    pintarEmpresas();
+  } catch (err) { console.error('Error al eliminar empresa:', err.message); }
 }
 
 // ---------- Mis ofertas ----------
@@ -106,14 +108,19 @@ function pintarOfertas() {
       </td>
     </tr>`).join('');
 }
-function cambiarEstadoOferta(id) {
+async function cambiarEstadoOferta(id) {
   const o = Store.find('empleos', id);
-  Store.update('empleos', id, { estado: o.estado === 'Activa' ? 'Pausada' : 'Activa' });
-  pintarOfertas(); pintarResumen();
+  try {
+    await Store.update('empleos', id, { estado: o.estado === 'Activa' ? 'Pausada' : 'Activa' });
+    pintarOfertas(); pintarResumen();
+  } catch (err) { console.error('Error al cambiar estado oferta:', err.message); }
 }
-function eliminarOferta(id) {
+async function eliminarOferta(id) {
   if (!confirm('¿Eliminar esta oferta?')) return;
-  Store.remove('empleos', id); pintarOfertas(); pintarResumen(); pintarSelectOfertas();
+  try {
+    await Store.remove('empleos', id);
+    pintarOfertas(); pintarResumen(); pintarSelectOfertas();
+  } catch (err) { console.error('Error al eliminar oferta:', err.message); }
 }
 
 // ---------- Postulaciones y candidatos ----------
@@ -141,10 +148,12 @@ function pintarCandidatos() {
     </div>`;
   }).join('') : '<div class="tl-empty"><i class="bi bi-inbox"></i>Esta oferta aún no tiene postulaciones.</div>';
 }
-function cambiarEstadoPostulacion(id, estado) {
-  Store.update('postulaciones', id, { estado });
-  UI.toast(`Estado actualizado a "${estado}". Se notificará al candidato.`);
-  pintarResumen();
+async function cambiarEstadoPostulacion(id, estado) {
+  try {
+    await Store.update('postulaciones', id, { estado });
+    UI.toast(`Estado actualizado a "${estado}". Se notificará al candidato.`);
+    pintarResumen();
+  } catch (err) { console.error('Error al cambiar estado postulación:', err.message); }
 }
 // Modal con la revisión del perfil del candidato
 function verCandidato(usuarioId, postId) {
@@ -161,7 +170,7 @@ function verCandidato(usuarioId, postId) {
         <p class="small"><i class="bi bi-geo-alt me-2"></i>${u.ubicacion}</p>
         <h4 class="h6 mt-3">Habilidades</h4><div>${u.habilidades.map((h) => `<span class="tl-chip me-1 mb-1">${h}</span>`).join('') || '—'}</div>
         <h4 class="h6 mt-3">Carta de presentación</h4><p class="small bg-light p-3 rounded-3">${p.carta || 'Sin carta de presentación.'}</p>
-        <a href="#" class="btn btn-light w-100" onclick="UI.toast('Descarga simulada del CV','info');return false;"><i class="bi bi-file-earmark-pdf text-danger"></i> CV_${u.nombre}_${u.apellidos}.pdf</a>
+        <a href="${p.cvAdjunto || '#'}" class="btn btn-light w-100" ${p.cvAdjunto ? `target="_blank" download` : `onclick="UI.toast('El candidato no adjuntó CV','warning');return false;"`}><i class="bi bi-file-earmark-pdf text-danger"></i> ${p.cvAdjunto ? p.cvAdjunto.split('/').pop() : 'Sin CV adjunto'}</a>
       </div>
     </div>
     <div class="modal-footer border-0"><button class="btn btn-primary w-100" data-bs-dismiss="modal" onclick="cambiarEstadoPostulacion(${p.id}, 'Entrevista'); pintarCandidatos();"><i class="bi bi-calendar-plus me-1"></i>Invitar a entrevista</button></div>`;
@@ -169,7 +178,8 @@ function verCandidato(usuarioId, postId) {
 }
 
 // ---------- Inicialización ----------
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await Store.ready;
   // Aviso si no se ha iniciado sesión como empresa
   const s = Sesion.get();
   if (!s || s.rol === 'candidato') {
@@ -181,38 +191,42 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('filtro-oferta').addEventListener('change', pintarCandidatos);
 
   // Guardar empresa (crear o editar)
-  document.getElementById('form-empresa').addEventListener('submit', (ev) => {
+  document.getElementById('form-empresa').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const datos = {};
     ['nombre', 'sector', 'ubicacion', 'empleados', 'email', 'telefono', 'web', 'direccion', 'descripcion', 'color'].forEach((c) => (datos[c] = document.getElementById(`emp-${c}`).value));
     const id = document.getElementById('emp-id').value;
-    if (id) Store.update('empresas', id, datos);
-    else {
-      const s = Sesion.get();
-      Store.add('empresas', { ...datos, verificada: false, propia: true, usuarioId: s ? s.id : null });
-    }
-    bootstrap.Modal.getInstance(document.getElementById('modal-empresa')).hide();
-    UI.toast(id ? 'Empresa actualizada' : 'Empresa agregada');
-    pintarEmpresas();
+    try {
+      if (id) await Store.update('empresas', id, datos);
+      else {
+        const s = Sesion.get();
+        await Store.add('empresas', { ...datos, verificada: false, propia: true, usuarioId: s ? s.id : null });
+      }
+      bootstrap.Modal.getInstance(document.getElementById('modal-empresa')).hide();
+      UI.toast(id ? 'Empresa actualizada' : 'Empresa agregada');
+      pintarEmpresas();
+    } catch (err) { console.error('Error al guardar empresa:', err.message); }
   });
 
   // Publicar empleo
   const lineas = (id) => document.getElementById(id).value.split('\n').map((x) => x.trim()).filter(Boolean);
-  document.getElementById('form-publicar').addEventListener('submit', (ev) => {
+  document.getElementById('form-publicar').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const v = (id) => document.getElementById(id).value;
     if (Number(v('pub-salmin')) > Number(v('pub-salmax'))) return UI.toast('El salario mínimo no puede ser mayor al máximo', 'warning');
-    const nuevo = Store.add('empleos', {
-      titulo: v('pub-titulo'), empresaId: Number(v('pub-empresa')), ubicacion: v('pub-ubicacion'), modalidad: v('pub-modalidad'),
-      tipo: v('pub-tipo'), contrato: v('pub-contrato'), nivel: v('pub-nivel'), sector: v('pub-sector'),
-      salarioMin: Number(v('pub-salmin')), salarioMax: Number(v('pub-salmax')), fecha: new Date().toISOString(), estado: 'Activa',
-      descripcion: v('pub-descripcion'), responsabilidades: lineas('pub-responsabilidades'), requisitos: lineas('pub-requisitos'), beneficios: lineas('pub-beneficios'),
-      contactoEmail: v('pub-email'), contactoTelefono: v('pub-telefono')
-    });
-    ev.target.reset();
-    UI.toast(`¡Oferta "${nuevo.titulo}" publicada! Ya aparece en la búsqueda.`);
-    pintarOfertas(); pintarResumen(); pintarSelectOfertas();
-    mostrarSeccion('ofertas');
+    try {
+      const nuevo = await Store.add('empleos', {
+        titulo: v('pub-titulo'), empresaId: Number(v('pub-empresa')), ubicacion: v('pub-ubicacion'), modalidad: v('pub-modalidad'),
+        tipo: v('pub-tipo'), contrato: v('pub-contrato'), nivel: v('pub-nivel'), sector: v('pub-sector'),
+        salarioMin: Number(v('pub-salmin')), salarioMax: Number(v('pub-salmax')), fecha: new Date().toISOString(), estado: 'Activa',
+        descripcion: v('pub-descripcion'), responsabilidades: lineas('pub-responsabilidades'), requisitos: lineas('pub-requisitos'), beneficios: lineas('pub-beneficios'),
+        contactoEmail: v('pub-email'), contactoTelefono: v('pub-telefono')
+      });
+      ev.target.reset();
+      UI.toast(`¡Oferta "${nuevo.titulo}" publicada! Ya aparece en la búsqueda.`);
+      pintarOfertas(); pintarResumen(); pintarSelectOfertas();
+      mostrarSeccion('ofertas');
+    } catch (err) { console.error('Error al publicar empleo:', err.message); }
   });
 
   pintarResumen(); pintarEmpresas(); pintarOfertas(); pintarSelectOfertas(); pintarCandidatos();
